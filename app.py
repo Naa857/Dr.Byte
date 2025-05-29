@@ -1,9 +1,9 @@
 import base64
-from qa.answer import get_answer
-from qa.question_parser import parse_question
-from qa.function_tool import process_image_describe_tool
-from qa.purpose_type import userPurposeType
-from audio.audio_generate import audio_generate
+from core.qa.answer import get_answer
+from core.qa.question_parser import parse_question
+from core.qa.function_tool import process_image_describe_tool
+from core.qa.purpose_type import userPurposeType
+from core.audio.audio_generate import audio_generate
 
 import PyPDF2
 import chardet
