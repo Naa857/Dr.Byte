@@ -55,31 +55,7 @@ def extract_language(text: str) -> str:
 
 
 def get_tts_model_name(lang: str, gender: str) -> str:
-    if lang == "无" and (gender == "无" or gender == "男声"):
-        return "zh-CN-YunxiNeural", True  # 返回普通话男声
-
-    if lang == "无" and gender == "女声":
-        return "zh-CN-XiaoxiaoNeural", True  # 返回普通话女声
-
-    if lang == "陕西话" and (gender == "女声" or gender == "无"):
-        return "zh-CN-shaanxi-XiaoniNeural", True  # 返回陕西话女声
-
-    if lang == "东北话" and (gender == "女声" or gender == "无"):
-        return "zh-CN-liaoning-XiaobeiNeural", True  # 返回东北话女声
-
-    if lang == "粤语" and gender == "女声":
-        return "zh-HK-HiuMaanNeural", True  # 返回粤语女声
-
-    if lang == "粤语" and (gender == "男声" or gender == "无"):
-        return "zh-HK-WanLungNeural", True  # 返回粤语男声
-
-    if lang == "台湾话" and gender == "男声":
-        return "zh-TW-YunJheNeural", True  # 返回台湾话男声
-
-    if lang == "台湾话" and (gender == "女声" or gender == "无"):
-        return "zh-TW-HsiaoChenNeural", True  # 返回台湾话女声
-
-    return "zh-CN-YunxiNeural", False  # 可设置一个默认返回值，防止未匹配的情况
+    return "en-HK-YanNeural", False  # 可设置一个默认返回值，防止未匹配的情况
 
 
 def extract_gender(text: str) -> str:
