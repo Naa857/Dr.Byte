@@ -184,9 +184,19 @@ def grodio_view(chatbot, chat_input):
         or answer[1] == userPurposeType.KnowledgeGraph
     ):
         # 流式输出
-        for chunk in answer[0]:
-            bot_response = bot_response + (chunk.choices[0].delta.content or "")
-            chatbot[-1][1] = bot_response
+        try:
+            for chunk in answer[0]:
+                if hasattr(chunk, 'choices') and chunk.choices and len(chunk.choices) > 0:
+                    content = chunk.choices[0].delta.content if hasattr(chunk.choices[0].delta, 'content') else ""
+                    bot_response = bot_response + (content or "")
+                    chatbot[-1][1] = bot_response
+                    yield chatbot
+                else:
+                    print("Warning: Received empty chunk or invalid chunk format")
+                    continue
+        except Exception as e:
+            print(f"Error processing stream: {str(e)}")
+            chatbot[-1][1] = "抱歉，处理响应时出现错误，请稍后重试"
             yield chatbot
 
     # 处理图片生成
@@ -194,7 +204,7 @@ def grodio_view(chatbot, chat_input):
         image_url = answer[0]
         describe = process_image_describe_tool(
             question_type=userPurposeType.ImageDescribe,
-            question="描述这个图片，不要识别‘AI生成’",
+            question="描述这个图片，不要识别'AI生成'",
             history="",
             image_url=[image_url],
         )
@@ -309,22 +319,34 @@ def gradio_audio_view(chatbot, audio_input):
         or answer[1] == userPurposeType.KnowledgeGraph
     ):
         # 语音输出
-        for chunk in answer[0]:
-            # 获取每个块的数据
-            chunk_content = chunk.choices[0].delta.content or ""
-            bot_response += chunk_content
-
         try:
-            chatbot[-1][1] = (
-                audio_generate(
-                    text=bot_response,
-                    model_name="zh-CN-YunxiNeural",
-                ),
-                "audio",
-            )
+            bot_response = ""  # 确保初始化为空字符串
+            for chunk in answer[0]:
+                if hasattr(chunk, 'choices') and chunk.choices and len(chunk.choices) > 0:
+                    content = chunk.choices[0].delta.content if hasattr(chunk.choices[0].delta, 'content') else ""
+                    if content is not None:  # 确保内容不是 None
+                        bot_response = bot_response + str(content)  # 使用 str() 确保转换为字符串
+                else:
+                    print("Warning: Received empty chunk or invalid chunk format")
+                    continue
+
+            if not bot_response:  # 如果 bot_response 为空
+                bot_response = "抱歉，未能获取到有效响应"
+
+            try:
+                chatbot[-1][1] = (
+                    audio_generate(
+                        text=bot_response,
+                        model_name="zh-CN-YunxiNeural",
+                    ),
+                    "audio",
+                )
+            except Exception as e:
+                print(f"音频生成失败，直接返回文本: {str(e)}")
+                chatbot[-1][1] = bot_response 
         except Exception as e:
-            print(f"音频生成失败，直接返回文本: {str(e)}")
-            chatbot[-1][1] = bot_response 
+            print(f"Error processing stream: {str(e)}")
+            chatbot[-1][1] = "抱歉，处理响应时出现错误，请稍后重试"
             
         yield chatbot
 
@@ -333,7 +355,7 @@ def gradio_audio_view(chatbot, audio_input):
         image_url = answer[0]
         describe = process_image_describe_tool(
             question_type=userPurposeType.ImageDescribe,
-            question="描述这个图片，不要识别‘AI生成’",
+            question="描述这个图片，不要识别'AI生成'",
             history=" ",
             image_url=[image_url],
         )
