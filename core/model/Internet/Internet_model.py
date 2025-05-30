@@ -49,8 +49,8 @@ class InternetModel(Modelbase):
         
         # Use FAISS to create a vector database, storing the split documents and their embedding vectors
         vectorstore = FAISS.from_documents(documents=splits, embedding=self._embedding)
-        # Convert vector store to retriever, set retrieval parameter k to 6, meaning return the 6 most similar documents
-        self._retriever = vectorstore.as_retriever(search_kwargs={"k": 6})
+        # Convert vector store to retriever, set retrieval parameter k to 3, meaning return the 3 most similar documents
+        self._retriever = vectorstore.as_retriever(search_kwargs={"k": 3})
         
 
         

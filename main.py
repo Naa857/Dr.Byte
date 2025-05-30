@@ -253,9 +253,17 @@ def grodio_view(chatbot, chat_input):
             bot_response = output_message[: i + 1]
             chatbot[-1][1] = bot_response
             yield chatbot, gr.MultimodalTextbox(value="", file_count="multiple"), None
-        for chunk in answer[0]:
-            bot_response = bot_response + (chunk.choices[0].delta.content or "")
-            chatbot[-1][1] = bot_response
+        try:
+            for chunk in answer[0]:
+                if hasattr(chunk, 'choices') and chunk.choices and len(chunk.choices) > 0:
+                    content = chunk.choices[0].delta.content if hasattr(chunk.choices[0].delta, 'content') else ""
+                    if content is not None:
+                        bot_response = bot_response + content
+                        chatbot[-1][1] = bot_response
+                        yield chatbot, gr.MultimodalTextbox(value="", file_count="multiple"), None
+        except Exception as e:
+            print(f"Error processing internet search response: {str(e)}")
+            chatbot[-1][1] = "Sorry, an error occurred while processing the search results. Please try again."
             yield chatbot, gr.MultimodalTextbox(value="", file_count="multiple"), None
 
 
@@ -485,7 +493,7 @@ with gr.Blocks(theme=gr.themes.Soft(primary_hue="blue")) as demo:
                     {"left": "$$", "right": "$$", "display": True},
                     {"left": "$", "right": "$", "display": True},
                 ],
-                placeholder="\n## Welcome to talk to me \n————This project is open source, https://github.com/Warma10032/cyber-doctor",
+                placeholder="\n## Welcome to talk to me \n",
             )
             # Add image display component
 
