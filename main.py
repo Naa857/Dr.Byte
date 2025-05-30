@@ -503,9 +503,9 @@ examples = [
 
 
 # 构建 Gradio 界面
-with gr.Blocks() as demo:
+with gr.Blocks(theme=gr.themes.Soft(primary_hue="blue")) as demo:
     # 标题和描述
-    gr.Markdown("# 「赛博华佗」🩺")
+    gr.Markdown("# Dr.Byte🧑‍⚕️")
 
     # 创建聊天布局
     with gr.Row():
