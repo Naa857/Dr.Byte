@@ -581,7 +581,7 @@ with gr.Blocks() as demo:
 
 # 启动应用
 def start_gradio():
-    demo.launch(server_port=10032, share=False)
+    demo.launch(server_port=10035, share=False)
 
 
 if __name__ == "__main__":
