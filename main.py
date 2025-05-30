@@ -33,24 +33,24 @@ def convert_to_simplified(text):
 
 
 def convert_audio_to_wav(audio_file_path):
-    audio = AudioSegment.from_file(audio_file_path)  # 自动识别格式
-    wav_file_path = audio_file_path.rsplit(".", 1)[0] + ".wav"  # 生成 WAV 文件路径
-    audio.export(wav_file_path, format="wav")  # 将音频文件导出为 WAV 格式
+    audio = AudioSegment.from_file(audio_file_path)  # Automatically detect format
+    wav_file_path = audio_file_path.rsplit(".", 1)[0] + ".wav"  # Generate WAV file path
+    audio.export(wav_file_path, format="wav")  # Export audio file to WAV format
     return wav_file_path
 
 
 def audio_to_text(audio_file_path):
-    # 创建识别器对象
-    # 如果不是 WAV 格式，先转换为 WAV
+    # Create recognizer object
+    # If not WAV format, convert to WAV first
     if not audio_file_path.endswith(".wav"):
         audio_file_path = convert_audio_to_wav(audio_file_path)
 
     recognizer = sr.Recognizer()
     with sr.AudioFile(audio_file_path) as source:
         audio_data = recognizer.record(source)
-        # 使用 Google Web Speech API 进行语音识别，不用下载模型但对网络要求高
+        # Use Google Web Speech API for speech recognition, no model download required but needs good network
         # text = recognizer.recognize_google(audio_data, language="zh-CN")
-        # 使用 whisper 进行语音识别，自动下载模型到本地
+        # Use whisper for speech recognition, automatically downloads model locally
         text = recognizer.recognize_whisper(audio_data, language="zh")
         text_simplified = convert_to_simplified(text)
     return text_simplified
@@ -80,7 +80,7 @@ def text_file_to_str(text_file):
         result = chardet.detect(raw_data)
         encoding = result["encoding"]
 
-    # 使用检测到的编码来读取文件
+    # Read file using detected encoding
     with open(text_file, "r", encoding=encoding) as file:
         return file.read()
 
@@ -91,15 +91,15 @@ def image_to_base64(image_path):
         return encoded_string
 
 
-# 核心函数
+# Core function
 def grodio_view(chatbot, chat_input):
-    # 用户消息立即显示
+    # Display user message immediately
     user_message = chat_input["text"]
     bot_response = "loading..."
     chatbot.append([user_message, bot_response])
     yield chatbot, gr.MultimodalTextbox(value="", file_count="multiple"), None
 
-    # 处理用户上传的文件
+    # Process uploaded files
     files = chat_input["files"]
     audios = []
     images = []
@@ -125,7 +125,7 @@ def grodio_view(chatbot, chat_input):
             user_message += "Please modify and output the following sentence without additional text, sentence: 'This file type is not supported'"
             print(f"Unknown file type: {file_type}")
 
-    # 图片文件解析
+    # Process image files
     if images != []:
         image_url = images
         image_base64 = [image_to_base64(image) for image in image_url]
@@ -145,7 +145,7 @@ def grodio_view(chatbot, chat_input):
     question_type = parse_question(user_message, image_url)
     ic(question_type)
 
-    # 音频文件解析
+    # Process audio files
     if audios != []:
         for i, audio in enumerate(audios):
             audio_message = audio_to_text(audio)
@@ -176,13 +176,13 @@ def grodio_view(chatbot, chat_input):
     answer = get_answer(user_message, chatbot, question_type, image_url)
     bot_response = ""
 
-    # 处理文本生成/其他/文档检索/知识图谱检索
+    # Process text generation/other/document retrieval/knowledge graph retrieval
     if (
         answer[1] == userPurposeType.text
         or answer[1] == userPurposeType.RAG
         or answer[1] == userPurposeType.KnowledgeGraph
     ):
-        # 流式输出
+        # Stream output
         try:
             for chunk in answer[0]:
                 if hasattr(chunk, 'choices') and chunk.choices and len(chunk.choices) > 0:
@@ -198,14 +198,14 @@ def grodio_view(chatbot, chat_input):
             chatbot[-1][1] = "Sorry, an error occurred while processing the response, please try again later"
             yield chatbot, gr.MultimodalTextbox(value="", file_count="multiple"), None
 
-    # 处理图片生成
+    # Process image generation
     if answer[1] == userPurposeType.ImageGeneration:
         image_url = answer[0]
-        # 不再生成图片描述消息
+        # No longer generate image description message
         chatbot[-1][1] = (image_url, "image")
         yield chatbot, gr.MultimodalTextbox(value="", file_count="multiple"), None
 
-    # 处理视频
+    # Process video
     if answer[1] == userPurposeType.Video:
         if answer[0] is not None:
             video_url = answer[0][0]
@@ -214,7 +214,7 @@ def grodio_view(chatbot, chat_input):
             chatbot[-1][1] = "Sorry, video generation failed, please try again later"
         yield chatbot, gr.MultimodalTextbox(value="", file_count="multiple"), None
 
-    # 处理PPT
+    # Process PPT
     if answer[1] == userPurposeType.PPT:
         if answer[0] is not None:
             chatbot[-1][1] = answer[0]
@@ -222,7 +222,7 @@ def grodio_view(chatbot, chat_input):
             chatbot[-1][1] = "Sorry, PPT generation failed, please try again later"
         yield chatbot, gr.MultimodalTextbox(value="", file_count="multiple"), None
 
-    # 处理Docx
+    # Process Docx
     if answer[1] == userPurposeType.Docx:
         if answer[0] is not None:
             chatbot[-1][1] = answer[0]
@@ -230,7 +230,7 @@ def grodio_view(chatbot, chat_input):
             chatbot[-1][1] = "Sorry, document generation failed, please try again later"
         yield chatbot, gr.MultimodalTextbox(value="", file_count="multiple"), None
 
-    # 处理音频生成
+    # Process audio generation
     if answer[1] == userPurposeType.Audio:
         if answer[0] is not None:
             chatbot[-1][1] = answer[0]
@@ -238,14 +238,14 @@ def grodio_view(chatbot, chat_input):
             chatbot[-1][1] = "Sorry, audio generation failed, please try again later"
         yield chatbot, gr.MultimodalTextbox(value="", file_count="multiple"), None
 
-    # 处理联网搜索
+    # Process internet search
     if answer[1] == userPurposeType.InternetSearch:
         if answer[3] == False:
             output_message = (
                 "Due to network issues, access to the internet failed. Below is my response based on existing knowledge:"
             )
         else:
-            # 将字典中的内容转换为 Markdown 格式的链接
+            # Convert dictionary content to Markdown format links
             links = "\n".join(f"[{title}]({link})" for link, title in answer[2].items())
             links += "\n"
             output_message = f"Reference materials: {links}"
@@ -260,8 +260,7 @@ def grodio_view(chatbot, chat_input):
 
 
 def gradio_audio_view(chatbot, audio_input):
-
-    # 用户消息立即显示
+    # Display user message immediately
     if audio_input is None:
         user_message = ""
     else:
@@ -282,7 +281,7 @@ def gradio_audio_view(chatbot, audio_input):
         user_message += "Please modify and output the following sentence without additional text, sentence: 'Welcome to talk to me, I will answer you with voice'"
     elif audio_message == "":
         user_message += "Please modify and output the following sentence without additional text, sentence: 'Audio recognition failed, please try again later'"
-    elif "作曲 作曲" in audio_message:
+    elif "作曲" in audio_message:
         user_message += "Please modify and output the following sentence without additional text, sentence: 'Sorry, I cannot understand music'"
     else:
         user_message += audio_message
@@ -295,25 +294,25 @@ def gradio_audio_view(chatbot, audio_input):
     answer = get_answer(user_message, chatbot, question_type)
     bot_response = ""
 
-    # 处理文本生成/其他/文档检索/知识图谱检索
+    # Process text generation/other/document retrieval/knowledge graph retrieval
     if (
         answer[1] == userPurposeType.text
         or answer[1] == userPurposeType.RAG
         or answer[1] == userPurposeType.KnowledgeGraph
     ):
-        # 语音输出
+        # Audio output
         try:
-            bot_response = ""  # 确保初始化为空字符串
+            bot_response = ""  # Ensure initialized as empty string
             for chunk in answer[0]:
                 if hasattr(chunk, 'choices') and chunk.choices and len(chunk.choices) > 0:
                     content = chunk.choices[0].delta.content if hasattr(chunk.choices[0].delta, 'content') else ""
-                    if content is not None:  # 确保内容不是 None
-                        bot_response = bot_response + str(content)  # 使用 str() 确保转换为字符串
+                    if content is not None:  # Ensure content is not None
+                        bot_response = bot_response + str(content)  # Use str() to ensure string conversion
                 else:
                     print("Warning: Received empty chunk or invalid chunk format")
                     continue
 
-            if not bot_response:  # 如果 bot_response 为空
+            if not bot_response:  # If bot_response is empty
                 bot_response = "Sorry, no valid response could be obtained"
 
             try:
@@ -333,14 +332,14 @@ def gradio_audio_view(chatbot, audio_input):
             
         yield chatbot
 
-    # 处理图片生成
+    # Process image generation
     if answer[1] == userPurposeType.ImageGeneration:
         image_url = answer[0]
-        # 不再生成图片描述消息
+        # No longer generate image description message
         chatbot[-1][1] = (image_url, "image")
         yield chatbot, gr.MultimodalTextbox(value="", file_count="multiple"), None
 
-    # 处理视频
+    # Process video
     if answer[1] == userPurposeType.Video:
         if answer[0] is not None:
             video_url = answer[0][0]
@@ -358,7 +357,7 @@ def gradio_audio_view(chatbot, audio_input):
                 chatbot[-1][1] = "Sorry, video generation failed, please try again later"
         yield chatbot
 
-    # 处理PPT
+    # Process PPT
     if answer[1] == userPurposeType.PPT:
         if answer[0] is not None:
             chatbot[-1][1] = answer[0]
@@ -375,7 +374,7 @@ def gradio_audio_view(chatbot, audio_input):
                 chatbot[-1][1] = "Sorry, PPT generation failed, please try again later"
         yield chatbot
 
-    # 处理Docx
+    # Process Docx
     if answer[1] == userPurposeType.Docx:
         if answer[0] is not None:
             chatbot[-1][1] = answer[0]
@@ -392,7 +391,7 @@ def gradio_audio_view(chatbot, audio_input):
                 chatbot[-1][1] = "Sorry, document generation failed, please try again later"
         yield chatbot
 
-    # 处理音频生成
+    # Process audio generation
     if answer[1] == userPurposeType.Audio:
         if answer[0] is not None:
             chatbot[-1][1] = answer[0]
@@ -409,15 +408,15 @@ def gradio_audio_view(chatbot, audio_input):
                 chatbot[-1][1] = "Sorry, audio generation failed, please try again later"
         yield chatbot
 
-    # 处理联网搜索
+    # Process internet search
     if answer[1] == userPurposeType.InternetSearch:
         if answer[3] == False:
             bot_response = (
                 "Due to network issues, access to the internet failed. Below is my response based on existing knowledge:"
             )
-        # 语音输出
+        # Audio output
         for chunk in answer[0]:
-            # 获取每个块的数据
+            # Get data from each chunk
             chunk_content = chunk.choices[0].delta.content or ""
             bot_response += chunk_content
 
@@ -435,7 +434,7 @@ def gradio_audio_view(chatbot, audio_input):
         yield chatbot
 
 
-# 切换到语音模式的函数
+# Function to switch to voice mode
 def toggle_voice_mode():
     return (
         gr.update(visible=False),
@@ -446,7 +445,7 @@ def toggle_voice_mode():
     )
 
 
-# 切换回文本模式的函数
+# Function to switch back to text mode
 def toggle_text_mode():
     return (
         gr.update(visible=True),
@@ -458,27 +457,22 @@ def toggle_text_mode():
 
 
 examples = [
-    {"text": "你好，請介紹一下自己", "files": []},
-    {"text": "What are the common symptoms of diabetes?", "files": []},
-    {"text": "請幫我生成一張太極拳的圖片", "files": []},
+    {"text": "Hello, please introduce yourself", "files": []},
+    {"text": "Please generate an image of Tai Chi", "files": []},
     {"text": "Can you help me search for information about traditional Chinese medicine?", "files": []},
-    {"text": "請幫我生成一份關於糖尿病的PPT，包含發病原因、症狀、治療藥物和預防措施", "files": []},
-    {"text": "What foods are suitable for diabetic patients?", "files": []},
-    {"text": "請幫我生成一份養生食譜的Word文檔", "files": []},
-    {"text": "Can you analyze my medical report?", "files": []},
-    {"text": "請幫我生成一個太極拳的視頻", "files": []},
-    {"text": "What are the benefits of practicing Tai Chi?", "files": []},
-    {"text": "請幫我生成一份關於中醫養生的PPT", "files": []},
-    {"text": "Can you generate a Word document about healthy diet?", "files": []},
+    {"text": "Please generate a PPT about diabetes, including causes, symptoms, treatment drugs and preventive measures", "files": []},
+    {"text": "Please generate a Word document about health recipes", "files": []},
+    {"text": "Please generate a Tai Chi video", "files": []},
+    {"text": "Based on the knowledge base, what is sub-health?", "files": []},
 ]
 
 
-# 构建 Gradio 界面
+# Build Gradio interface
 with gr.Blocks(theme=gr.themes.Soft(primary_hue="blue")) as demo:
-    # 标题和描述
+    # Title and description
     gr.Markdown("# Dr.Byte🧑‍⚕️")
 
-    # 创建聊天布局
+    # Create chat layout
     with gr.Row():
         with gr.Column(scale=10):
             chatbot = gr.Chatbot(
@@ -493,7 +487,7 @@ with gr.Blocks(theme=gr.themes.Soft(primary_hue="blue")) as demo:
                 ],
                 placeholder="\n## Welcome to talk to me \n————This project is open source, https://github.com/Warma10032/cyber-doctor",
             )
-            # 添加图片显示组件
+            # Add image display component
 
     with gr.Row():
         with gr.Column(scale=9):
@@ -525,7 +519,7 @@ with gr.Blocks(theme=gr.themes.Soft(primary_hue="blue")) as demo:
         inputs=[chatbot, chat_input], 
         outputs=[chatbot, chat_input]
     )
-    # 切换按钮点击事件
+    # Toggle button click events
     toggle_voice_button.click(
         fn=toggle_voice_mode,
         inputs=None,
@@ -555,7 +549,7 @@ with gr.Blocks(theme=gr.themes.Soft(primary_hue="blue")) as demo:
     )
 
 
-# 启动应用
+# Start application
 def start_gradio():
     demo.launch(server_port=10035, share=False)
 

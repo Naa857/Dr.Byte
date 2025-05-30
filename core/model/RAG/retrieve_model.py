@@ -1,4 +1,4 @@
-'''本地知识库的RAG检索模型类'''
+'''RAG retrieval model class for local knowledge base'''
 from core.model.model_base import Modelbase
 from core.model.model_base import ModelStatus
 from config.config import Config
@@ -30,7 +30,7 @@ from langchain_community.vectorstores.faiss import FAISS
 from modelscope.hub.snapshot_download import snapshot_download
 
 
-# 检索模型
+# Retrieval model
 class Retrievemodel(Modelbase):
 
     _retriever: VectorStoreRetriever
@@ -38,7 +38,7 @@ class Retrievemodel(Modelbase):
     def __init__(self, *args, **krgs):
         super().__init__(*args, **krgs)
 
-        # 此处请自行改成下载embedding模型的位置
+        # Please modify this to your own embedding model download location
         self._embedding_download_path = Config.get_instance().get_with_nested_params(
             "model", "embedding", "model-path"
         )
@@ -50,7 +50,7 @@ class Retrievemodel(Modelbase):
         )
         if not os.path.exists(self._embedding_model_path):
             try:
-                # 如果为空，则从modelscope下载模型
+                # If empty, download model from modelscope
                 model_dir = snapshot_download(
                     self._embedding_model_name,
                     cache_dir=self._embedding_download_path,
@@ -72,10 +72,10 @@ class Retrievemodel(Modelbase):
         self._user_retrievers = {}
 
 
-    # 建立向量库
+    # Build vector store
     def build(self):
 
-        # 加载PDF文件
+        # Load PDF files
         pdf_loader = DirectoryLoader(
             self._data_path,
             glob="**/*.pdf",
@@ -85,7 +85,7 @@ class Retrievemodel(Modelbase):
         )
         pdf_docs = pdf_loader.load()
 
-        # 加载Word文件
+        # Load Word files
         docx_loader = DirectoryLoader(
             self._data_path,
             glob="**/*.docx",
@@ -95,7 +95,7 @@ class Retrievemodel(Modelbase):
         )
         docx_docs = docx_loader.load()
 
-        # 加载txt文件
+        # Load txt files
         txt_loader = DirectoryLoader(
             self._data_path,
             glob="**/*.txt",
@@ -106,7 +106,7 @@ class Retrievemodel(Modelbase):
         )
         txt_docs = txt_loader.load()
 
-        # 加载csv文件
+        # Load csv files
         csv_loader = DirectoryLoader(
             self._data_path,
             glob="**/*.csv",
@@ -117,7 +117,7 @@ class Retrievemodel(Modelbase):
         )
         csv_docs = csv_loader.load()
 
-        # 加载html文件
+        # Load html files
         html_loader = DirectoryLoader(
             self._data_path,
             glob="**/*.html",
@@ -136,7 +136,7 @@ class Retrievemodel(Modelbase):
         )
         mhtml_docs = mhtml_loader.load()
 
-        # 加载markdown文件
+        # Load markdown files
         markdown_loader = DirectoryLoader(
             self._data_path,
             glob="**/*.md",
@@ -146,12 +146,12 @@ class Retrievemodel(Modelbase):
         )
         markdown_docs = markdown_loader.load()
 
-        # 要利用json数据要设置jq语句和content_key提取特定字段，这在不同json数据结构中有所不同，较为繁琐。
-        # 官方文档：https://api.python.langchain.com/en/latest/document_loaders/langchain_community.document_loaders.json_loader.JSONLoader.html
+        # To use JSON data, you need to set jq statements and content_key to extract specific fields, which varies with different JSON data structures and is quite cumbersome.
+        # Official documentation: https://api.python.langchain.com/en/latest/document_loaders/langchain_community.document_loaders.json_loader.JSONLoader.html
         # json_loader = DirectoryLoader(self._data_path, glob="**/*.json", loader_kwargs={"jq_schema": ".","text_content":False},loader_cls=JSONLoader, silent_errors=True)
         # json_docs = json_loader.load()
 
-        # 合并文档
+        # Merge documents
         docs = (
             pdf_docs
             + docx_docs
@@ -162,18 +162,18 @@ class Retrievemodel(Modelbase):
             + markdown_docs
         )
 
-        # 创建一个 RecursiveCharacterTextSplitter 对象，用于将文档分割成块，chunk_size为最大块大小，chunk_overlap块之间可以重叠的大小
+        # Create a RecursiveCharacterTextSplitter object to split documents into chunks, chunk_size is the maximum chunk size, chunk_overlap is the size that can overlap between chunks
         text_splitter = RecursiveCharacterTextSplitter(
             chunk_size=2000, chunk_overlap=100
         )
         splits = text_splitter.split_documents(docs)
 
-        # 使用 FAISS 创建一个向量数据库，存储分割后的文档及其嵌入向量
+        # Use FAISS to create a vector database, storing the split documents and their embedding vectors
         vectorstore = FAISS.from_documents(documents=splits, embedding=self._embedding)
-        # 将向量存储转换为检索器，设置检索参数 k 为 6，即返回最相似的 6 个文档
+        # Convert vector store to retriever, set retrieval parameter k to 6, meaning return the 6 most similar documents
         self._retriever = vectorstore.as_retriever(search_kwargs={"k": 6})
 
-        # 设置模型状态为 BUILDING
+        # Set model status to BUILDING
         self._model_status = ModelStatus.BUILDING
 
     @property
@@ -185,194 +185,194 @@ class Retrievemodel(Modelbase):
             return self._retriever
 
     def build_user_vector_store(self):
-        """根据用户的ID加载用户文件夹中的文件并为用户构建向量库"""
-        user_data_path = os.path.join("user_data", self.user_id)  # 用户独立文件夹
+        """Load files from user's folder and build vector store for user based on user ID"""
+        user_data_path = os.path.join("user_data", self.user_id)  # User's independent folder
         if not os.path.exists(user_data_path):
-            print(f"用户文件夹 {user_data_path} 不存在")
+            print(f"User folder {user_data_path} does not exist")
             return
 
         try:
-            # 清理旧的向量库（如果已经存在）
+            # Clean up old vector store (if it exists)
             if self.user_id in self._user_retrievers:
                 del self._user_retrievers[self.user_id]
-                print(f"用户 {self.user_id} 的旧向量库已删除")
+                print(f"Old vector store for user {self.user_id} has been deleted")
 
-                # 加载用户文件夹中的文件并构建向量库
-                # 加载PDF文件
-            pdf_loader = DirectoryLoader(
-                user_data_path,
-                glob="**/*.pdf",
-                loader_cls=PyPDFLoader,
-                silent_errors=True,
-                use_multithreading=True,
-            )
-            pdf_docs = pdf_loader.load()
+                # Load files from user's folder and build vector store
+                # Load PDF files
+                pdf_loader = DirectoryLoader(
+                    user_data_path,
+                    glob="**/*.pdf",
+                    loader_cls=PyPDFLoader,
+                    silent_errors=True,
+                    use_multithreading=True,
+                )
+                pdf_docs = pdf_loader.load()
 
-            # 加载Word文件
-            docx_loader = DirectoryLoader(
-                user_data_path,
-                glob="**/*.docx",
-                loader_cls=UnstructuredWordDocumentLoader,
-                silent_errors=True,
-                use_multithreading=True,
-            )
-            docx_docs = docx_loader.load()
+                # Load Word files
+                docx_loader = DirectoryLoader(
+                    user_data_path,
+                    glob="**/*.docx",
+                    loader_cls=UnstructuredWordDocumentLoader,
+                    silent_errors=True,
+                    use_multithreading=True,
+                )
+                docx_docs = docx_loader.load()
 
-            # 加载txt文件
-            txt_loader = DirectoryLoader(
-                user_data_path,
-                glob="**/*.txt",
-                loader_cls=TextLoader,
-                silent_errors=True,
-                loader_kwargs={"autodetect_encoding": True},
-                use_multithreading=True,
-            )
-            txt_docs = txt_loader.load()
+                # Load txt files
+                txt_loader = DirectoryLoader(
+                    user_data_path,
+                    glob="**/*.txt",
+                    loader_cls=TextLoader,
+                    silent_errors=True,
+                    loader_kwargs={"autodetect_encoding": True},
+                    use_multithreading=True,
+                )
+                txt_docs = txt_loader.load()
 
-            # 加载csv文件
-            csv_loader = DirectoryLoader(
-                user_data_path,
-                glob="**/*.csv",
-                loader_cls=CSVLoader,
-                silent_errors=True,
-                loader_kwargs={"autodetect_encoding": True},
-                use_multithreading=True,
-            )
-            csv_docs = csv_loader.load()
+                # Load csv files
+                csv_loader = DirectoryLoader(
+                    user_data_path,
+                    glob="**/*.csv",
+                    loader_cls=CSVLoader,
+                    silent_errors=True,
+                    loader_kwargs={"autodetect_encoding": True},
+                    use_multithreading=True,
+                )
+                csv_docs = csv_loader.load()
 
-            # 加载html文件
-            html_loader = DirectoryLoader(
-                user_data_path,
-                glob="**/*.html",
-                loader_cls=UnstructuredHTMLLoader,
-                silent_errors=True,
-                use_multithreading=True,
-            )
-            html_docs = html_loader.load()
+                # Load html files
+                html_loader = DirectoryLoader(
+                    user_data_path,
+                    glob="**/*.html",
+                    loader_cls=UnstructuredHTMLLoader,
+                    silent_errors=True,
+                    use_multithreading=True,
+                )
+                html_docs = html_loader.load()
 
-            mhtml_loader = DirectoryLoader(
-                user_data_path,
-                glob="**/*.mhtml",
-                loader_cls=MHTMLLoader,
-                silent_errors=True,
-                use_multithreading=True,
-            )
-            mhtml_docs = mhtml_loader.load()
+                mhtml_loader = DirectoryLoader(
+                    user_data_path,
+                    glob="**/*.mhtml",
+                    loader_cls=MHTMLLoader,
+                    silent_errors=True,
+                    use_multithreading=True,
+                )
+                mhtml_docs = mhtml_loader.load()
 
-            # 加载markdown文件
-            markdown_loader = DirectoryLoader(
-                user_data_path,
-                glob="**/*.md",
-                loader_cls=UnstructuredMarkdownLoader,
-                silent_errors=True,
-                use_multithreading=True,
-            )
-            markdown_docs = markdown_loader.load()
+                # Load markdown files
+                markdown_loader = DirectoryLoader(
+                    user_data_path,
+                    glob="**/*.md",
+                    loader_cls=UnstructuredMarkdownLoader,
+                    silent_errors=True,
+                    use_multithreading=True,
+                )
+                markdown_docs = markdown_loader.load()
 
-            # 要利用json数据要设置jq语句和content_key提取特定字段，这在不同json数据结构中有所不同，较为繁琐。
-            # 官方文档：https://api.python.langchain.com/en/latest/document_loaders/langchain_community.document_loaders.json_loader.JSONLoader.html
-            # json_loader = DirectoryLoader(self._data_path, glob="**/*.json", loader_kwargs={"jq_schema": ".","text_content":False},loader_cls=JSONLoader, silent_errors=True)
-            # json_docs = json_loader.load()
+                # To use JSON data, you need to set jq statements and content_key to extract specific fields, which varies with different JSON data structures and is quite cumbersome.
+                # Official documentation: https://api.python.langchain.com/en/latest/document_loaders/langchain_community.document_loaders.json_loader.JSONLoader.html
+                # json_loader = DirectoryLoader(self._data_path, glob="**/*.json", loader_kwargs={"jq_schema": ".","text_content":False},loader_cls=JSONLoader, silent_errors=True)
+                # json_docs = json_loader.load()
 
-            # 合并文档
-            docs = (
-                pdf_docs
-                + docx_docs
-                + txt_docs
-                + csv_docs
-                + html_docs
-                + mhtml_docs
-                + markdown_docs
-            )
+                # Merge documents
+                docs = (
+                    pdf_docs
+                    + docx_docs
+                    + txt_docs
+                    + csv_docs
+                    + html_docs
+                    + mhtml_docs
+                    + markdown_docs
+                )
 
-            if not docs:
-                print(f"用户 {self.user_id} 文件夹中没有找到文档")
-                return
+                if not docs:
+                    print(f"User {self.user_id} folder has no documents")
+                    return
 
-            text_splitter = RecursiveCharacterTextSplitter(
-                chunk_size=2000, chunk_overlap=100
-            )
-            splits = text_splitter.split_documents(docs)
+                text_splitter = RecursiveCharacterTextSplitter(
+                    chunk_size=2000, chunk_overlap=100
+                )
+                splits = text_splitter.split_documents(docs)
 
-            # 为该用户构建向量库
-            vectorstore = FAISS.from_documents(
-                documents=splits, embedding=self._embedding
-            )
-            user_retriever = vectorstore.as_retriever(search_kwargs={"k": 6})
+                # Build vector store for the user
+                vectorstore = FAISS.from_documents(
+                    documents=splits, embedding=self._embedding
+                )
+                user_retriever = vectorstore.as_retriever(search_kwargs={"k": 6})
 
-            # 将用户的retriever存储到字典中
-            self._user_retrievers[self.user_id] = user_retriever
-            print(f"用户 {self.user_id} 的向量库已构建完成")
+                # Store user's retriever in dictionary
+                self._user_retrievers[self.user_id] = user_retriever
+                print(f"User {self.user_id} vector store has been built")
 
         except Exception as e:
-            print(f"构建用户 {self.user_id} 向量库时出错: {e}")
+            print(f"Error building user {self.user_id} vector store: {e}")
 
     def get_user_retriever(self) -> VectorStoreRetriever:
-        """获取用户的retriever，如果不存在则返回None"""
+        """Get user's retriever, return None if it doesn't exist"""
         return self._user_retrievers.get(self.user_id, None)
 
     def upload_user_file(self, file):
-        """将用户上传的文件存储到用户的文件夹中"""
+        """Store user uploaded file in user's folder"""
         user_data_path = os.path.join("user_data", self.user_id)
-        os.makedirs(user_data_path, exist_ok=True)  # 确保用户文件夹存在
+        os.makedirs(user_data_path, exist_ok=True)  # Ensure user folder exists
 
         file_path = os.path.join(user_data_path, file.name)
         with open(file_path, "wb") as f:
             f.write(file.read())
 
-        print(f"文件 {file.name} 已成功上传到用户 {self.user_id} 的文件夹")
+        print(f"File {file.name} has been successfully uploaded to user {self.user_id}'s folder")
 
-    # 展示用户已上传的文件
+    # Show user uploaded files
     def list_uploaded_files(self):
-        """展示用户文件夹中已经上传的文件"""
+        """Show files already uploaded in user's folder"""
         user_data_path = os.path.join("user_data", self.user_id)
         if not os.path.exists(user_data_path):
-            print(f"用户文件夹 {user_data_path} 不存在")
+            print(f"User folder {user_data_path} does not exist")
             return []
 
         files = os.listdir(user_data_path)
         if files:
-            print(f"用户 {self.user_id} 已上传的文件：")
+            print(f"Files already uploaded by user {self.user_id}:")
             for file in files:
                 print(file)
         else:
-            print(f"用户 {self.user_id} 文件夹为空")
+            print(f"User {self.user_id} folder is empty")
 
         return files
 
-    # 删除指定文件或清空用户文件夹
+    # Delete specified file or empty user folder
     def delete_uploaded_file(self, filename=None):
-        """删除用户文件夹中的指定文件，或清空文件夹"""
+        """Delete specified file from user's folder or empty folder"""
         user_data_path = os.path.join("user_data", self.user_id)
         if not os.path.exists(user_data_path):
-            print(f"用户文件夹 {user_data_path} 不存在")
+            print(f"User folder {user_data_path} does not exist")
             return
 
         if filename:
             file_path = os.path.join(user_data_path, filename)
             if os.path.exists(file_path):
                 os.remove(file_path)
-                print(f"文件 {filename} 已成功删除")
+                print(f"File {filename} has been successfully deleted")
             else:
-                print(f"文件 {filename} 不存在")
+                print(f"File {filename} does not exist")
         else:
-            # 清空文件夹
+            # Empty folder
             for file in os.listdir(user_data_path):
                 file_path = os.path.join(user_data_path, file)
                 os.remove(file_path)
-            print(f"用户 {self.user_id} 文件夹已清空")
+            print(f"User {self.user_id} folder has been emptied")
 
     def view_uploaded_file(self, filename):
-        """根据文件名返回用户文件的路径"""
-        user_data_path = os.path.join("user_data", self.user_id)  # 定义用户文件夹路径
-        file_path = os.path.join(user_data_path, filename)  # 拼接完整的文件路径
+        """Return file path of user file based on filename"""
+        user_data_path = os.path.join("user_data", self.user_id)  # Define user folder path
+        file_path = os.path.join(user_data_path, filename)  # Concatenate full file path
 
         if not os.path.exists(file_path):
-            print(f"文件 {filename} 不存在")
+            print(f"File {filename} does not exist")
             return None
 
-        # 文件存在时返回文件的完整路径
-        print(f"文件 {filename} 路径已成功获取")
+        # Return full path of file when file exists
+        print(f"File {filename} path has been successfully retrieved")
         return file_path
 
 

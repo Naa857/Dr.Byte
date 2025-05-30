@@ -12,10 +12,10 @@ from icecream import ic
 
 def parse_question(question: str, image_url=None) -> userPurposeType:
 
-    if "based on knowledge base" in question:
+    if "Based on the knowledge base" in question:
         return purpose_map["Knowledge Base Based"]
     
-    if "based on knowledge graph" in question:
+    if "Based on the knowledge graph" in question:
         return purpose_map["Knowledge Graph Based"]
 
     if "search" in question:

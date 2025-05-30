@@ -1,4 +1,4 @@
-'''edge-tts调用接口'''
+'''Edge-TTS API interface'''
 import os
 import asyncio
 
@@ -8,7 +8,7 @@ import edge_tts
 
 _OUTPUT_DIR = os.path.join(get_app_root(), "data/cache/audio")
 
-# 如果文件夹路径不存在，先创建
+# If the folder path does not exist, create it first
 if not os.path.exists(_OUTPUT_DIR):
     os.makedirs(_OUTPUT_DIR)
 
@@ -21,7 +21,7 @@ def get_file_path(text):
 def audio_generate(text: str, model_name : str) -> str:
     _output_file = get_file_path(text)
 
-    # 异步调用_generating函数，使得I/O时可以进行其他操作
+    # Asynchronously call _generating function to allow other operations during I/O
     async def _generating() -> None:
         communicate = edge_tts.Communicate(text, model_name)
         await communicate.save(_output_file)

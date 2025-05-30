@@ -1,10 +1,10 @@
-'''大模型特征工程，让大模型输出json格式的数据'''
+'''Feature engineering for large models, making them output data in JSON format'''
 import json
 import re
 from typing import List, Dict
 from core.client.clientfactory import Clientfactory
 
-# 模拟一个用于生成 docx 内容的 JSON 模板
+# JSON template for generating docx content
 __output_format_docx = json.dumps({
     "title": "example title",
     "sections": [
@@ -41,10 +41,10 @@ __output_format_docx = json.dumps({
     ]
 }, ensure_ascii=True)
 
-# 定义一个 prompt 用于生成 docx 内容
+# Prompt for generating docx content
 _GENERATE_DOCX_PROMPT_ = f'''Please generate detailed Word document content based on the user's request without omitting any details. Output according to this JSON format {__output_format_docx}. Only return JSON, do not wrap it in ```, and do not return markdown format.'''
 
-# 构造消息函数，历史记录被包括在内
+# Construct message function, history is included
 def __construct_messages_docx(question: str, history: List[List | None]) -> List[Dict[str, str]]:
     messages = [
         {"role": "system",
@@ -59,7 +59,7 @@ def __construct_messages_docx(question: str, history: List[List | None]) -> List
 
     return messages
 
-# 生成 docx 内容的函数
+# Function to generate docx content
 def generate_docx_content(question: str,
                          history: List[List | None] | None = None) -> str:
     messages = __construct_messages_docx(question, history or [])
@@ -68,22 +68,22 @@ def generate_docx_content(question: str,
     print(result)
     print(type(result))
 
-    # 处理生成内容中的多余部分，比如"json"关键字或者反引号
+    # Remove extra parts from generated content, such as "json" keyword or backticks
     result = re.sub(r'\bjson\b', '', result)
     result = re.sub(r'`', '', result)
 
-    # 检查生成内容的结尾是否正确
+    # Check if the end of generated content is correct
     index_of_last = result.rfind('"')
     total_result = None
     print(result)
 
     if index_of_last != -1 and result[index_of_last + 1:] == '}]}]}':
-        # 如果格式正确，不做改变
+        # If format is correct, make no changes
         total_result = result
         print(total_result)
         return total_result
     else:
-        # 如果格式不正确，修复 JSON 的结尾
+        # If format is incorrect, fix JSON ending
         total_result = result[:index_of_last + 1] + '}]}]}'
         print(total_result)
         return total_result

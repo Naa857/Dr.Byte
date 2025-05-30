@@ -12,17 +12,17 @@ from env import get_app_root
 
 _OUTPUT_DIR_DOCX = os.path.join(get_app_root(), "data/cache/docx")
 
-# 如果文件夹路径不存在，先创建
+# If the folder path does not exist, create it first
 if not os.path.exists(_OUTPUT_DIR_DOCX):
     os.makedirs(_OUTPUT_DIR_DOCX)
 
 def get_file_path_docx(text):
-    """生成唯一的文件路径"""
-    file_name = hashlib.sha256(text.encode("utf-8")).hexdigest()  # 可以使用uuid替代
+    """Generate unique file path"""
+    file_name = hashlib.sha256(text.encode("utf-8")).hexdigest()  # Can use uuid instead
     return os.path.join(_OUTPUT_DIR_DOCX, f"{file_name}.docx")
 
 def is_chinese(text: str) -> bool:
-    """判断文本中是否包含中文字符"""
+    """Check if text contains Chinese characters"""
     return bool(re.search(r'[\u4e00-\u9fff]', text))
 
 def generate_docx_content(docx_content: Dict) -> str:
@@ -34,10 +34,10 @@ def generate_docx_content(docx_content: Dict) -> str:
     title_heading.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
     title_run = title_heading.runs[0]
     
-    # 根据标题是否包含中文设置字体
+    # Set font based on whether title contains Chinese
     if is_chinese(docx_content['title']):
-        title_run.font.name = '黑体'  # 中文字体
-        title_run._element.rPr.rFonts.set(qn('w:eastAsia'), '黑体')  # 设置中文字体
+        title_run.font.name = 'SimHei'  # Chinese font
+        title_run._element.rPr.rFonts.set(qn('w:eastAsia'), 'SimHei')  # Set Chinese font
     else:
         title_run.font.name = 'Arial'  
     
@@ -50,10 +50,10 @@ def generate_docx_content(docx_content: Dict) -> str:
         section_heading = document.add_heading(section['heading'], level=1)
         section_heading_run = section_heading.runs[0]
         
-        # 根据章节标题是否包含中文设置字体
+        # Set font based on whether section heading contains Chinese
         if is_chinese(section['heading']):
-            section_heading_run.font.name = '宋体'
-            section_heading_run._element.rPr.rFonts.set(qn('w:eastAsia'), '宋体')
+            section_heading_run.font.name = 'SimSun'
+            section_heading_run._element.rPr.rFonts.set(qn('w:eastAsia'), 'SimSun')
         else:
             section_heading_run.font.name = 'Times New Roman'
         
@@ -63,10 +63,10 @@ def generate_docx_content(docx_content: Dict) -> str:
             para_heading = document.add_heading(paragraph['heading'], level=2)
             para_heading_run = para_heading.runs[0]
             
-            # Set font based on whether the paragraph title contains Chinese
+            # Set font based on whether paragraph title contains Chinese
             if is_chinese(paragraph['heading']):
-                para_heading_run.font.name = '宋体'
-                para_heading_run._element.rPr.rFonts.set(qn('w:eastAsia'), '宋体')
+                para_heading_run.font.name = 'SimSun'
+                para_heading_run._element.rPr.rFonts.set(qn('w:eastAsia'), 'SimSun')
             else:
                 para_heading_run.font.name = 'Calibri'
             
@@ -76,10 +76,10 @@ def generate_docx_content(docx_content: Dict) -> str:
             p = document.add_paragraph(paragraph['content'])
             p_run = p.runs[0]
             
-            # 根据正文内容是否包含中文设置字体
+            # Set font based on whether body content contains Chinese
             if is_chinese(paragraph['content']):
-                p_run.font.name = '宋体'
-                p_run._element.rPr.rFonts.set(qn('w:eastAsia'), '宋体')
+                p_run.font.name = 'SimSun'
+                p_run._element.rPr.rFonts.set(qn('w:eastAsia'), 'SimSun')
             else:
                 p_run.font.name = 'Arial'
             

@@ -14,13 +14,13 @@ from env import get_app_root
 
 _OUTPUT_DIR = os.path.join(get_app_root(), "data/cache/ppt")
 
-# 如果文件夹路径不存在，先创建
+# If the folder path does not exist, create it first
 if not os.path.exists(_OUTPUT_DIR):
     os.makedirs(_OUTPUT_DIR)
 
 def get_file_path(text):
-    """生成唯一的文件路径"""
-    file_name = hashlib.sha256(text.encode("utf-8")).hexdigest()  ## 也可以使用uuid
+    """Generate unique file path"""
+    file_name = hashlib.sha256(text.encode("utf-8")).hexdigest()  ## You can also use uuid
     return os.path.join(_OUTPUT_DIR, f"{file_name}.pptx")
 
 def generate(ppt_content: Dict) -> str:
@@ -38,20 +38,20 @@ def generate(ppt_content: Dict) -> str:
         print("Generating page %d: %s" % (i + 1, page["title"]))
         slide = ppt.slides.add_slide(ppt.slide_layouts[1])  # title&content layout
         
-        # 标题
+        # Title
         slide.placeholders[0].text = page["title"]
-        # 正文
-        text_frame = slide.placeholders[1].text_frame  # 获取文本框的text_frame对象
+        # Content
+        text_frame = slide.placeholders[1].text_frame  # Get text_frame object
         
 
         for sub_content in page["content"]:
             print(sub_content)
             
-            # 一级正文
+            # Level 1 content
             sub_title = text_frame.add_paragraph()
             sub_title.text, sub_title.level = sub_content["title"], 2
             
-            # 二级正文
+            # Level 2 content
             sub_description = text_frame.add_paragraph()
             sub_description.text, sub_description.level = sub_content["description"], 3
             

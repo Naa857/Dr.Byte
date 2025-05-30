@@ -1,4 +1,4 @@
-'''枚举可能用到的模型状态'''
+'''Enumeration of possible model states'''
 from enum import Enum
 
 
@@ -26,6 +26,6 @@ class Modelbase(object):
     def user_id(self):
         return self._user_id
     
-    # 新增修改 user_id 的函数
+    # Function to modify user_id
     def set_user_id(self, new_id):
         self._user_id = new_id

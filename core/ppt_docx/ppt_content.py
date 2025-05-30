@@ -1,11 +1,11 @@
-'''大模型特征工程，让大模型输出json格式的数据'''
+'''Feature engineering for large models, making them output data in JSON format'''
 import json
 from typing import List, Dict
 import re
 
 from core.client.clientfactory import Clientfactory
 
-# 输出格式
+# Output format
 __output_format = json.dumps({
     "title": "example title",
     "pages": [
@@ -58,7 +58,7 @@ def __construct_messages(question: str, history: List[List | None]) -> List[Dict
 
     return messages
 
-#生成ppt的文字内容，并对格式进行检查修改
+# Generate ppt content and check format
 def generate_ppt_content(question: str,
                          history: List[List | None] | None = None) -> str:
     messages = __construct_messages(question, history or [])
@@ -75,7 +75,7 @@ def generate_ppt_content(question: str,
     print(result)
 
     if index_of_last!= -1 and result[index_of_last + 1:] == '}]}]}':
-        # 如果已经是正确的，则不做任何改变
+        # If already correct, make no changes
         total_result = result
         print(total_result)
         return total_result

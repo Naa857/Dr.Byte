@@ -1,4 +1,4 @@
-'''联网搜索的RAG检索模型类'''
+'''RAG retrieval model class for internet search'''
 from core.model.model_base import Modelbase
 from core.model.model_base import ModelStatus
 
@@ -13,7 +13,7 @@ from langchain_community.vectorstores.faiss import FAISS
 
 from config.config import Config
 
-# 检索模型
+# Retrieval model
 class InternetModel(Modelbase):
     
     _retriever: VectorStoreRetriever
@@ -21,7 +21,7 @@ class InternetModel(Modelbase):
     def __init__(self,*args,**krgs):
         super().__init__(*args,**krgs)
 
-        # 此处请自行改成下载embedding模型的位置
+        # Please modify this to your own embedding model download location
         self._embedding_model_path =Config.get_instance().get_with_nested_params("model", "embedding", "model-name")
         self._text_splitter = RecursiveCharacterTextSplitter
         #self._embedding = OpenAIEmbeddings()
@@ -30,9 +30,9 @@ class InternetModel(Modelbase):
         
         #self._logger: Logger = Logger("rag_retriever")
 
-    # 建立向量库
+    # Build vector store
     def build(self):
-        # 加载html文件
+        # Load html files
         html_loader = DirectoryLoader(self._data_path, glob="**/*.html", loader_cls=UnstructuredHTMLLoader, silent_errors=True, use_multithreading=True)
         html_docs = html_loader.load()
         
@@ -40,16 +40,16 @@ class InternetModel(Modelbase):
         mhtml_docs = mhtml_loader.load()
         
         
-        #合并文档
+        # Merge documents
         docs =  html_docs + mhtml_docs
         
-        # 创建一个 RecursiveCharacterTextSplitter 对象，用于将文档分割成块，chunk_size为最大块大小，chunk_overlap块之间可以重叠的大小
+        # Create a RecursiveCharacterTextSplitter object to split documents into chunks, chunk_size is the maximum chunk size, chunk_overlap is the size that can overlap between chunks
         text_splitter = RecursiveCharacterTextSplitter(chunk_size=2000, chunk_overlap=100)
         splits = text_splitter.split_documents(docs)
         
-        # 使用 FAISS 创建一个向量数据库，存储分割后的文档及其嵌入向量
+        # Use FAISS to create a vector database, storing the split documents and their embedding vectors
         vectorstore = FAISS.from_documents(documents=splits, embedding=self._embedding)
-        # 将向量存储转换为检索器，设置检索参数 k 为 6，即返回最相似的 6 个文档
+        # Convert vector store to retriever, set retrieval parameter k to 6, meaning return the 6 most similar documents
         self._retriever = vectorstore.as_retriever(search_kwargs={"k": 6})
         
 
