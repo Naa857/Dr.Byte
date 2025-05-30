@@ -207,14 +207,11 @@ def grodio_view(chatbot, chat_input):
             history="",
             image_url=[image_url],
         )
-        # 将图片URL和描述文本组合
-        combined_message = f"""
-            **Generated Image:**
-            {image_url}
-            {describe[0]}
-            """
-        chatbot[-1][1] = combined_message
-        yield chatbot, gr.MultimodalTextbox(value="", file_count="multiple")
+        # 更新图片显示
+        image_display.update(value=image_url, visible=True)
+        # 将描述文本添加到对话
+        chatbot[-1][1] = describe[0]
+        yield chatbot, gr.MultimodalTextbox(value="", file_count="multiple"), image_display
 
     # 处理图片描述
     if answer[1] == userPurposeType.ImageDescribe:
@@ -359,14 +356,11 @@ def gradio_audio_view(chatbot, audio_input):
             history=" ",
             image_url=[image_url],
         )
-        # 将图片URL和描述文本组合
-        combined_message = f"""
-            **Generated Image:**
-            {image_url}
-            {describe[0]}
-            """
-        chatbot[-1][1] = combined_message
-        yield chatbot
+        # 更新图片显示
+        image_display.update(value=image_url, visible=True)
+        # 将描述文本添加到对话
+        chatbot[-1][1] = describe[0]
+        yield chatbot, image_display
 
     # 处理视频
     if answer[1] == userPurposeType.Video:
@@ -520,6 +514,8 @@ with gr.Blocks(theme=gr.themes.Soft(primary_hue="blue")) as demo:
                 ],
                 placeholder="\n## Welcome to talk to me \n————This project is open source, https://github.com/Warma10032/cyber-doctor",
             )
+            # 添加图片显示组件
+            image_display = gr.Image(label="Generated Image", visible=False)
 
     with gr.Row():
         with gr.Column(scale=9):
@@ -536,7 +532,7 @@ with gr.Blocks(theme=gr.themes.Soft(primary_hue="blue")) as demo:
                 type="filepath",
             )
         with gr.Column(scale=1):
-            clear = gr.ClearButton([chatbot, chat_input, audio_input], value="Clear Record")
+            clear = gr.ClearButton([chatbot, chat_input, audio_input, image_display], value="Clear Record")
             toggle_voice_button = gr.Button("Voice Conversation Mode", visible=True)
             toggle_text_button = gr.Button("Text Conversation Mode", visible=False)
             submit_audio_button = gr.Button("Send", visible=False)
