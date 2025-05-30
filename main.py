@@ -209,7 +209,7 @@ def grodio_view(chatbot, chat_input):
         )
         combined_message = f"""
             **Generated Image:**
-            ![Generated Image]({image_url})
+            <img src="{image_url}" alt="Generated Image" style="max-width: 100%; height: auto; cursor: pointer;" />
             {describe[0]}
             """
         chatbot[-1][1] = combined_message
@@ -360,7 +360,7 @@ def gradio_audio_view(chatbot, audio_input):
         )
         combined_message = f"""
             **Generated Image:**
-            ![Generated Image]({image_url})
+            <img src="{image_url}" alt="Generated Image" style="max-width: 100%; height: auto; cursor: pointer;" />
             {describe[0]}
             """
         chatbot[-1][1] = combined_message
