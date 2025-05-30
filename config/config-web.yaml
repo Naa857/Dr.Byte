@@ -5,7 +5,7 @@ cache:
   async: thread
 
 # Knowledge base directory, place knowledge base files in this directory, such as various .pdf, .word files
-Knowledge-base-path: ./konwledge-base
+Knowledge-base-path: ./knowledge-base
 
 model:
   graph-entity:
