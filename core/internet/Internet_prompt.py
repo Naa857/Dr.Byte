@@ -1,9 +1,9 @@
-'''大模型特征工程，提取搜索关键词'''
+'''Large model feature engineering, extract search keywords'''
 from typing import List, Dict
 from core.client.clientfactory import Clientfactory
 
 _GENERATE_Internet_PROMPT_ = (
-    "请根据用户的提问，提取出一个可以在搜索引擎上搜索的问题（不要有多余的内容）"
+    "Please extract a searchable question from the user's query (without any extra content)"
 )
 
 
@@ -13,11 +13,11 @@ def __construct_messages(
     messages = [
         {
             "role": "system",
-            "content": "你现在扮演信息抽取的角色，要求根据用户输入和AI的回答，正确提取出信息，无需包含提示文字",
+            "content": "You are now playing the role of information extraction. Based on user input and AI responses, correctly extract information without including prompt text",
         }
     ]
 
-    messages.append({"role": "user", "content": f"用户提问：{question}"})
+    messages.append({"role": "user", "content": f"User question: {question}"})
     messages.append({"role": "user", "content": _GENERATE_Internet_PROMPT_})
 
     return messages

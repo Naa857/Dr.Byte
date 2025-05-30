@@ -1,4 +1,4 @@
-'''向外部构建不同大模型代理的接口，构建完成后返回一个大模型代理'''
+'''Interface for constructing different large model proxies externally, returns a large model proxy after construction'''
 from core.client.ourAPI.client import OurAPI
 from core.client.zhipuAPI.client import Image_generate_client, Image_describe_client
 from core.client.zhipuAPI.client import Video_generate_client
@@ -7,26 +7,26 @@ from core.qa.purpose_type import userPurposeType
 
 
 class Clientfactory:
-    # 初始化client字典，使用环境变量中的LLM_BASE_URL
+    # Initialize client dictionary using LLM_BASE_URL from environment variables
     map_client_dict = {get_env_value("LLM_BASE_URL")}
 
-    # 初始化client的url和apikey，使用环境变量中的LLM_BASE_URL，LLM_API_KEY
+    # Initialize client url and apikey using LLM_BASE_URL and LLM_API_KEY from environment variables
     def __init__(self):
         self._client_url = get_env_value("LLM_BASE_URL")
         self._api_key = get_env_value("LLM_API_KEY")
 
     def get_client(self):
         """
-        获取默认的客户端实例
+        Get default client instance
         """
-        return OurAPI()  # 返回我们自己的API客户端实例
+        return OurAPI()  # Return our own API client instance
 
     @staticmethod
     def get_special_client(client_type: str):
         """
-        根据客户端类型获取特定的客户端实例
-        :param client_type: 客户端类型，字符串类型
-        :return: 对应的客户端实例
+        Get specific client instance based on client type
+        :param client_type: Client type, string type
+        :return: Corresponding client instance
         """
         print("get_special_client")
         if client_type == userPurposeType.ImageGeneration:
@@ -36,5 +36,5 @@ class Clientfactory:
         if client_type == userPurposeType.Video:
             return Video_generate_client
 
-        # 默认情况下使用文本生成模型
+        # Use text generation model by default
         return OurAPI()

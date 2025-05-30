@@ -46,7 +46,7 @@ def InternetSearchChain(question, history):
 
     if has_html_files(_SAVE_PATH):
         docs, _context = retrieve_html(question)
-        prompt = f"根据你现有的知识，辅助以搜索到的文件资料：\n{_context}\n 回答问题：\n{question}\n 尽可能多的覆盖到文件资料"
+        prompt = f"Based on your existing knowledge, supplemented by the searched file materials:\n{_context}\n Answer the question:\n{question}\n Try to cover as much of the file materials as possible"
     else:
         prompt = question
 
@@ -99,9 +99,9 @@ def search_bing(query, links, num_results=3):
                         )
                 except Exception as e:
                     print(f"Error downloading {link}: {e}")
-            # 检查是否达到了期望的结果数
+            # Check if we've reached the expected number of results
             if flag < num_results:
-                print("访问bing失败，请检查网络代理")
+                print("Failed to access Bing, please check network proxy")
         else:
             print("Error: ", response.status_code)
 
@@ -151,9 +151,9 @@ def search_baidu(query, links, num_results=3):
             except Exception as e:
                 print(f"Error downloading {link}: {e}")
 
-        # 检查是否达到了期望的结果数
+        # Check if we've reached the expected number of results
         if flag < num_results:
-            print("访问百度失败，请检查网络代理制")
+            print("Failed to access Baidu, please check network proxy")
     else:
         print("Error: ", response.status_code)
 

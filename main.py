@@ -123,7 +123,7 @@ def grodio_view(chatbot, chat_input):
         elif file_type.startswith("text/"):
             texts.append(file)
         else:
-            user_message += "请你将下面的句子修饰后输出，不要包含额外的文字，句子:'该文件为不支持的文件类型'"
+            user_message += "Please modify and output the following sentence without additional text, sentence: 'This file type is not supported'"
             print(f"Unknown file type: {file_type}")
 
     # 图片文件解析
@@ -151,29 +151,29 @@ def grodio_view(chatbot, chat_input):
         for i, audio in enumerate(audios):
             audio_message = audio_to_text(audio)
             if audio_message == "":
-                user_message += "请你将下面的句子修饰后输出，不要包含额外的文字，句子:'音频识别失败，请稍后再试'"
+                user_message += "Please modify and output the following sentence without additional text, sentence: 'Audio recognition failed, please try again later'"
             elif "作曲" in audio_message:
-                user_message += "请你将下面的句子修饰后输出，不要包含额外的文字，句子:'不好意思，我无法理解音乐'"
+                user_message += "Please modify and output the following sentence without additional text, sentence: 'Sorry, I cannot understand music'"
             else:
-                user_message += f"音频{i+1}内容：{audio_message}"
+                user_message += f"Audio {i+1} content: {audio_message}"
 
     if pdfs != []:
         for i, pdf in enumerate(pdfs):
             pdf_text = pdf_to_str(pdf)
-            user_message += f"PDF{i+1}内容：{pdf_text}"
+            user_message += f"PDF{i+1} content: {pdf_text}"
 
     if docxs != []:
         for i, docx in enumerate(docxs):
             docx_text = docx_to_str(docx)
-            user_message += f"DOCX{i+1}内容：{docx_text}"
+            user_message += f"DOCX{i+1} content: {docx_text}"
 
     if texts != []:
         for i, text in enumerate(texts):
             text_string = text_file_to_str(text)
-            user_message += f"文本{i+1}内容：{text_string}"
+            user_message += f"Text {i+1} content: {text_string}"
 
     if user_message == "":
-        user_message = "请你将下面的句子修饰后输出，不要包含额外的文字，句子:'请问您有什么想了解的，我将尽力为您服务'"
+        user_message = "Please modify and output the following sentence without additional text, sentence: 'What would you like to know? I will do my best to help you'"
     answer = get_answer(user_message, chatbot, question_type, image_url)
     bot_response = ""
 
@@ -196,7 +196,7 @@ def grodio_view(chatbot, chat_input):
                     continue
         except Exception as e:
             print(f"Error processing stream: {str(e)}")
-            chatbot[-1][1] = "抱歉，处理响应时出现错误，请稍后重试"
+            chatbot[-1][1] = "Sorry, an error occurred while processing the response, please try again later"
             yield chatbot
 
     # 处理图片生成
@@ -204,12 +204,12 @@ def grodio_view(chatbot, chat_input):
         image_url = answer[0]
         describe = process_image_describe_tool(
             question_type=userPurposeType.ImageDescribe,
-            question="描述这个图片，不要识别'AI生成'",
+            question="Describe this image, do not recognize 'AI generated'",
             history="",
             image_url=[image_url],
         )
         combined_message = f"""
-            **生成的图片:**
+            **Generated Image:**
             ![Generated Image]({image_url})
             {describe[0]}
             """
@@ -228,7 +228,7 @@ def grodio_view(chatbot, chat_input):
         if answer[0] is not None:
             chatbot[-1][1] = answer[0]
         else:
-            chatbot[-1][1] = "抱歉，视频生成失败，请稍后再试"
+            chatbot[-1][1] = "Sorry, video generation failed, please try again later"
         yield chatbot
 
     # 处理PPT
@@ -236,7 +236,7 @@ def grodio_view(chatbot, chat_input):
         if answer[0] is not None:
             chatbot[-1][1] = answer[0]
         else:
-            chatbot[-1][1] = "抱歉，PPT生成失败，请稍后再试"
+            chatbot[-1][1] = "Sorry, PPT generation failed, please try again later"
         yield chatbot
 
     # 处理Docx
@@ -244,7 +244,7 @@ def grodio_view(chatbot, chat_input):
         if answer[0] is not None:
             chatbot[-1][1] = answer[0]
         else:
-            chatbot[-1][1] = "抱歉，文档生成失败，请稍后再试"
+            chatbot[-1][1] = "Sorry, document generation failed, please try again later"
         yield chatbot
 
     # 处理音频生成
@@ -252,20 +252,20 @@ def grodio_view(chatbot, chat_input):
         if answer[0] is not None:
             chatbot[-1][1] = answer[0]
         else:
-            chatbot[-1][1] = "抱歉，音频生成失败，请稍后再试"
+            chatbot[-1][1] = "Sorry, audio generation failed, please try again later"
         yield chatbot
 
     # 处理联网搜索
     if answer[1] == userPurposeType.InternetSearch:
         if answer[3] == False:
             output_message = (
-                "由于网络问题，访问互联网失败，下面由我根据现有知识给出回答："
+                "Due to network issues, access to the internet failed. Below is my response based on existing knowledge:"
             )
         else:
             # 将字典中的内容转换为 Markdown 格式的链接
             links = "\n".join(f"[{title}]({link})" for link, title in answer[2].items())
             links += "\n"
-            output_message = f"参考资料：{links}"
+            output_message = f"Reference materials: {links}"
         for i in range(0, len(output_message)):
             bot_response = output_message[: i + 1]
             chatbot[-1][1] = bot_response
@@ -288,24 +288,24 @@ def gradio_audio_view(chatbot, audio_input):
     yield chatbot
 
     if audio_input is None:
-        audio_message = "无音频"
+        audio_message = "No audio"
     else:
         audio_message = audio_to_text(audio_input)
 
     chatbot[-1][0] = audio_message
 
     user_message = ""
-    if audio_message == "无音频":
-        user_message += "请你将下面的句子修饰后输出，不要包含额外的文字，句子:'欢迎与我对话，我将用语音回答您'"
+    if audio_message == "No audio":
+        user_message += "Please modify and output the following sentence without additional text, sentence: 'Welcome to talk to me, I will answer you with voice'"
     elif audio_message == "":
-        user_message += "请你将下面的句子修饰后输出，不要包含额外的文字，句子:'音频识别失败，请稍后再试'"
+        user_message += "Please modify and output the following sentence without additional text, sentence: 'Audio recognition failed, please try again later'"
     elif "作曲 作曲" in audio_message:
-        user_message += "请你将下面的句子修饰后输出，不要包含额外的文字，句子:'不好意思，我无法理解音乐'"
+        user_message += "Please modify and output the following sentence without additional text, sentence: 'Sorry, I cannot understand music'"
     else:
         user_message += audio_message
 
     if user_message == "":
-        user_message = "请你将下面的句子修饰后输出，不要包含额外的文字，句子:'请问您有什么想了解的，我将尽力为您服务'"
+        user_message = "Please modify and output the following sentence without additional text, sentence: 'What would you like to know? I will do my best to help you'"
 
     question_type = parse_question(user_message)
     ic(question_type)
@@ -331,7 +331,7 @@ def gradio_audio_view(chatbot, audio_input):
                     continue
 
             if not bot_response:  # 如果 bot_response 为空
-                bot_response = "抱歉，未能获取到有效响应"
+                bot_response = "Sorry, no valid response could be obtained"
 
             try:
                 chatbot[-1][1] = (
@@ -342,11 +342,11 @@ def gradio_audio_view(chatbot, audio_input):
                     "audio",
                 )
             except Exception as e:
-                print(f"音频生成失败，直接返回文本: {str(e)}")
+                print(f"Audio generation failed, returning text directly: {str(e)}")
                 chatbot[-1][1] = bot_response 
         except Exception as e:
             print(f"Error processing stream: {str(e)}")
-            chatbot[-1][1] = "抱歉，处理响应时出现错误，请稍后重试"
+            chatbot[-1][1] = "Sorry, an error occurred while processing the response, please try again later"
             
         yield chatbot
 
@@ -355,12 +355,12 @@ def gradio_audio_view(chatbot, audio_input):
         image_url = answer[0]
         describe = process_image_describe_tool(
             question_type=userPurposeType.ImageDescribe,
-            question="描述这个图片，不要识别'AI生成'",
+            question="Describe this image, do not recognize 'AI generated'",
             history=" ",
             image_url=[image_url],
         )
         combined_message = f"""
-            **生成的图片:**
+            **Generated Image:**
             ![Generated Image]({image_url})
             {describe[0]}
             """
@@ -375,13 +375,13 @@ def gradio_audio_view(chatbot, audio_input):
             try:
                 chatbot[-1][1] = (
                     audio_generate(
-                        text="抱歉，视频生成失败，请稍后再试",
+                        text="Sorry, video generation failed, please try again later",
                         model_name="en-HK-YanNeural",
                     ),
                     "audio",
                 )
             except Exception as e:
-                chatbot[-1][1] = "抱歉，视频生成失败，请稍后再试"
+                chatbot[-1][1] = "Sorry, video generation failed, please try again later"
         yield chatbot
 
     # 处理PPT
@@ -392,13 +392,13 @@ def gradio_audio_view(chatbot, audio_input):
             try:
                 chatbot[-1][1] = (
                     audio_generate(
-                        text="抱歉，PPT生成失败，请稍后再试",
+                        text="Sorry, PPT generation failed, please try again later",
                         model_name="en-HK-YanNeural",
                     ),
                     "audio",
                 )
             except Exception as e:
-                chatbot[-1][1] = "抱歉，PPT生成失败，请稍后再试"
+                chatbot[-1][1] = "Sorry, PPT generation failed, please try again later"
         yield chatbot
 
     # 处理Docx
@@ -409,13 +409,13 @@ def gradio_audio_view(chatbot, audio_input):
             try:
                 chatbot[-1][1] = (
                     audio_generate(
-                        text="抱歉，文档生成失败，请稍后再试",
+                        text="Sorry, document generation failed, please try again later",
                         model_name="en-HK-YanNeural",
                     ),
                     "audio",
                 )
             except Exception as e:
-                chatbot[-1][1] = "抱歉，文档生成失败，请稍后再试"
+                chatbot[-1][1] = "Sorry, document generation failed, please try again later"
         yield chatbot
 
     # 处理音频生成
@@ -426,20 +426,20 @@ def gradio_audio_view(chatbot, audio_input):
             try:
                 chatbot[-1][1] = (
                     audio_generate(
-                        text="抱歉，音频生成失败，请稍后再试",
+                        text="Sorry, audio generation failed, please try again later",
                         model_name="en-HK-YanNeural",
                     ),
                     "audio",
                 )
             except Exception as e:
-                chatbot[-1][1] = "抱歉，音频生成失败，请稍后再试"
+                chatbot[-1][1] = "Sorry, audio generation failed, please try again later"
         yield chatbot
 
     # 处理联网搜索
     if answer[1] == userPurposeType.InternetSearch:
         if answer[3] == False:
             bot_response = (
-                "由于网络问题，访问互联网失败，下面由我根据现有知识给出回答："
+                "Due to network issues, access to the internet failed. Below is my response based on existing knowledge:"
             )
         # 语音输出
         for chunk in answer[0]:
@@ -456,7 +456,7 @@ def gradio_audio_view(chatbot, audio_input):
                 "audio",
             )
         except Exception as e:
-            print(f"音频生成失败，直接返回文本: {str(e)}")
+            print(f"Audio generation failed, returning text directly: {str(e)}")
             chatbot[-1][1] = bot_response
         yield chatbot
 
@@ -484,21 +484,21 @@ def toggle_text_mode():
 
 
 examples = [
-    {"text": "您好", "files": []},
-    {"text": "糖尿病的常见症状有哪些？", "files": []},
-    {"text": "用语音重新回答我一次", "files": []},
-    {"text": "帮我搜索一下养生知识", "files": []},
-        {"text": "帮我生成一张老人练太极图片", "files": []},
+    {"text": "You are welcome", "files": []},
+    {"text": "What are the common symptoms of diabetes?", "files": []},
+    {"text": "Answer me again in voice", "files": []},
+    {"text": "Help me search for养生 knowledge", "files": []},
+        {"text": "Help me generate an old man practicing Tai Chi picture", "files": []},
     {
-        "text": "帮我生成一份用于科普糖尿病发病原因，症状，治疗药物，预防措施的PPT",
+        "text": "Help me generate a PPT for科普糖尿病发病原因，症状，治疗药物，预防措施",
         "files": [],
     },
-    {"text": "请根据我给的参考资料，给我一个合理的饮食建议", "files": []},
-    {"text": "请根据我给的参考资料，生成一个用于科普合理膳食的word", "files": []},
-    {"text": "我最近想打太极养生，帮我生成一段老人打太极的视频吧", "files": []},
-    {"text": "根据我的病历，给我一个合理的治疗方案", "files": []},
-    {"text": "根据知识库介绍一下常见疾病", "files": []},
-    {"text": "根据知识图谱告诉我糖尿病人适合吃的食物有哪些？", "files": []},
+    {"text": "Please give me a reasonable diet suggestion based on the reference materials I provided", "files": []},
+    {"text": "Please generate a word document for科普合理膳食", "files": []},
+    {"text": "I recently want to practice Tai Chi for养生, help me generate an old man practicing Tai Chi video", "files": []},
+    {"text": "Please give me a reasonable treatment plan based on my medical history", "files": []},
+    {"text": "Please introduce common diseases based on knowledge base", "files": []},
+    {"text": "Please tell me what foods are suitable for diabetic patients based on knowledge graph", "files": []},
 ]
 
 
@@ -520,7 +520,7 @@ with gr.Blocks() as demo:
                     {"left": "$$", "right": "$$", "display": True},
                     {"left": "$", "right": "$", "display": True},
                 ],
-                placeholder="\n## 欢迎与我对话 \n————本项目开源地址https://github.com/Warma10032/cyber-doctor",
+                placeholder="\n## Welcome to talk to me \n————This project is open source, https://github.com/Warma10032/cyber-doctor",
             )
 
     with gr.Row():
@@ -528,20 +528,20 @@ with gr.Blocks() as demo:
             chat_input = gr.MultimodalTextbox(
                 interactive=True,
                 file_count="multiple",
-                placeholder="输入消息或上传文件...",
+                placeholder="Enter message or upload files...",
                 show_label=False,
             )
             audio_input = gr.Audio(
                 sources=["microphone", "upload"],
-                label="录音输入",
+                label="Voice Input",
                 visible=False,
                 type="filepath",
             )
         with gr.Column(scale=1):
-            clear = gr.ClearButton([chatbot, chat_input, audio_input], value="清除记录")
-            toggle_voice_button = gr.Button("语音对话模式", visible=True)
-            toggle_text_button = gr.Button("文本交流模式", visible=False)
-            submit_audio_button = gr.Button("发送", visible=False)
+            clear = gr.ClearButton([chatbot, chat_input, audio_input], value="Clear Record")
+            toggle_voice_button = gr.Button("Voice Conversation Mode", visible=True)
+            toggle_text_button = gr.Button("Text Conversation Mode", visible=False)
+            submit_audio_button = gr.Button("Send", visible=False)
 
     with gr.Row() as example_row:
         example_component = gr.Examples(

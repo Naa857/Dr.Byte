@@ -1,20 +1,20 @@
-'''实例化知识图谱对象'''
+'''Instantiate knowledge graph object'''
 from config.config import Config
 from py2neo import Graph, NodeMatcher, RelationshipMatcher, ConnectionUnavailable
 
 class GraphDao(object):
 
     def __init__(self):
-        # 读取yaml配置
+        # Read yaml configuration
         self.__url = Config.get_instance().get_with_nested_params("database", "neo4j", "url")
         self.__username = Config.get_instance().get_with_nested_params("database", "neo4j", "username")
         self.__password = Config.get_instance().get_with_nested_params("database", "neo4j", "password")
         self.__connect_graph()
 
-        # 创建节点匹配器
+        # Create node matcher
         self.__node_matcher = NodeMatcher(self.__graph) if self.__graph else None
 
-        # 创建关系匹配器
+        # Create relationship matcher
         self.__relationship_matcher = RelationshipMatcher(self.__graph) if  self.__graph else None
 
     @staticmethod
@@ -34,13 +34,13 @@ class GraphDao(object):
     
     @ensure_connection
     def query_relationship_by_name(self, entity_name: str):
-        # 编写 Cypher 查询语句，查询指定实体作为起始或目标节点的所有关系
+        # Write Cypher query to find all relationships where the specified entity is the starting or target node
         query = """
         MATCH (a)-[r]-(b)
-        WHERE a.名称 = $entity_name
+        WHERE a.name = $entity_name
         RETURN a,r,b
         """
-        # 执行查询，并将查询结果返回
+        # Execute query and return results
         result = self.__graph.run(query, entity_name=entity_name).data()
         return result
     

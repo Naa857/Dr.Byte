@@ -1,32 +1,32 @@
 from enum  import Enum
 
 class userPurposeType(Enum):
-    #根据用户输入的文本信息的可能问题类型预定义
-    text = 0  #未知问题
-    Audio = 1   #语音生成
-    Video = 2   #视频生成
-    ImageGeneration = 3 #文生图
-    ImageDescribe = 4 #图生文
-    RAG = 5  #基于文件描述，后面有个向量库，对于单个用户，尽量从向量数据库给出回答，可能涉及检索加强
-    Hello = 6   #问候语，给出特定输出
-    PPT=7      #PPT生成
-    InternetSearch = 8 #网络搜索
-    Docx = 9   #生成word文件
-    KnowledgeGraph = 10 #基于知识图谱的问答
+    # Predefined possible question types based on user input text
+    text = 0  # Unknown question
+    Audio = 1   # Audio generation
+    Video = 2   # Video generation
+    ImageGeneration = 3 # Text to image
+    ImageDescribe = 4 # Image to text
+    RAG = 5  # Based on file description, with a vector database, for individual users, try to answer from vector database, may involve retrieval enhancement
+    Hello = 6   # Greeting, gives specific output
+    PPT=7      # PPT generation
+    InternetSearch = 8 # Internet search
+    Docx = 9   # Generate word file
+    KnowledgeGraph = 10 # Knowledge graph based Q&A
  
   
 purpose_map={
-"其他":userPurposeType.text,
-"文本生成":userPurposeType.text,
-"音频生成":userPurposeType.Audio,
-"视频生成":userPurposeType.Video,
-"图片描述":userPurposeType.ImageDescribe,
-"图片生成":userPurposeType.ImageGeneration,
-"基于知识库":userPurposeType.RAG,
-"问候语":userPurposeType.Hello,
-"PPT生成":userPurposeType.PPT,
-"Word生成":userPurposeType.Docx,
-"网络搜索":userPurposeType.InternetSearch,
-"基于知识图谱":userPurposeType.KnowledgeGraph,
+"Other":userPurposeType.text,
+"Text Generation":userPurposeType.text,
+"Audio Generation":userPurposeType.Audio,
+"Video Generation":userPurposeType.Video,
+"Image Description":userPurposeType.ImageDescribe,
+"Image Generation":userPurposeType.ImageGeneration,
+"Knowledge Base Based":userPurposeType.RAG,
+"Greeting":userPurposeType.Hello,
+"PPT Generation":userPurposeType.PPT,
+"Word Generation":userPurposeType.Docx,
+"Internet Search":userPurposeType.InternetSearch,
+"Knowledge Graph Based":userPurposeType.KnowledgeGraph,
 }
 

@@ -1,13 +1,13 @@
-'''调用model/Internet中的接口，检索搜索到的资料'''
+'''Call the interface in model/Internet to retrieve searched materials'''
 from typing import List,Tuple
 from langchain_core.documents import Document
 from core.model.Internet.Internet_service import retrieve
 
 def format_docs(docs:List[Document]):
-    return "\n-------------分割线--------------\n".join(doc.page_content for doc in docs)
+    return "\n-------------Separator--------------\n".join(doc.page_content for doc in docs)
 
 def retrieve_html(question:str)->Tuple[List[Document],str]:
-    docs = retrieve(question) # 这里的到的是文件
-    _context = format_docs(docs) # 这里处理成文本
+    docs = retrieve(question) # Here we get the files
+    _context = format_docs(docs) # Here we process it into text
     print(_context)
     return (docs,_context)

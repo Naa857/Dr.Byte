@@ -4,57 +4,57 @@ cache:
       - name
   async: thread
 
-# 知识库目录，目录下放知识库的文件，如各种.pdf, .word文件
+# Knowledge base directory, place knowledge base files in this directory, such as various .pdf, .word files
 Knowledge-base-path: ./konwledge-base
 
 model:
   graph-entity:
-    # 知识图谱中检索实体时的搜索主键，即匹配这个键对应的值，一般为“名称”或"name"
-    search-key: 名称
-  # 编码模型配置，仅在要使用知识库功能时需要配置
+    # Search key for entity retrieval in knowledge graph, i.e., match the value corresponding to this key, usually "name"
+    search-key: name
+  # Encoding model configuration, only needed when using knowledge base functionality
   embedding:
-    # 构建知识库时用于文本向量化的modelscope模型路径，windows下默认安装路径如下，设置为其他路径会重新下载到该路径
+    # ModelScope model path for text vectorization when building knowledge base, default installation path on Windows is as follows, setting to other paths will download to this path
     model-path: model_download
-    # modelscope模型名称和版本，可在modelscope官网查看，会自动下载，注意斜杠方向”/“
+    # ModelScope model name and version, can be viewed on ModelScope official website, will be downloaded automatically, note the slash direction "/"
     model-name: iic/nlp_corom_sentence-embedding_chinese-base-medical
     model-version: v1.1.0
     device: cpu
 
-# 知识图谱配置。仅在要使用知识图谱功能时需要配置
+# Knowledge graph configuration. Only needed when using knowledge graph functionality
 database:
   neo4j:
     url: bolt://localhost:7687
     database: neo4j
     username: neo4j
-    # 注意数字用引号引起来
+    # Note: numbers should be in quotes
     password:
-    # 定义你的数据库存在的节点标签和关系类型，用于检索
+    # Define your database's node labels and relationship types for retrieval
     node-label:
       [
-        "一级科室",
-        "二级科室",
-        "其他",
-        "检查手段",
-        "治疗方案",
-        "生产商",
-        "疾病",
-        "症状",
-        "药物",
-        "食物",
-        "食谱",
+        "Primary Department",
+        "Secondary Department",
+        "Other",
+        "Examination Method",
+        "Treatment Plan",
+        "Manufacturer",
+        "Disease",
+        "Symptom",
+        "Drug",
+        "Food",
+        "Recipe",
       ]
     relationship-type:
       [
-        "好评药物",
-        "宜吃",
-        "属于",
-        "常用药物",
-        "并发症",
-        "忌吃",
-        "所属科室",
-        "推荐食谱",
-        "治疗方法",
-        "生产药品",
-        "症状",
-        "诊断建议",
+        "Highly Rated Drug",
+        "Recommended Food",
+        "Belongs To",
+        "Common Drug",
+        "Complication",
+        "Avoided Food",
+        "Department",
+        "Recommended Recipe",
+        "Treatment Method",
+        "Produces Drug",
+        "Symptom",
+        "Diagnostic Suggestion",
       ]

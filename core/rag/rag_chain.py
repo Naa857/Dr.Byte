@@ -1,4 +1,4 @@
-# retrieve类型有很多种,这个文件用于调用不同RAG类型接口
+# There are many types of retrieve, this file is used to call different RAG type interfaces
 from core.rag.retrieve.retrieve_document import retrieve_docs
 from typing import List
 from openai import Stream
@@ -10,11 +10,11 @@ def invoke(question: str, history: List[List]) -> Stream[ChatCompletionChunk]:
     try:
         docs, _context = retrieve_docs(
             question
-        )  # 此处得到的是检索到的文件片段和文件处理后的文本
+        )  # Here we get the retrieved file fragments and processed text
     except Exception as e:
         _context = ""
 
-    prompt = f"请根据搜索到的文件信息\n{_context}\n 回答问题：\n{question}"
+    prompt = f"Please answer the question based on the searched file information:\n{_context}\n Question:\n{question}"
     response = Clientfactory().get_client().chat_with_ai_stream(prompt)
 
     return response

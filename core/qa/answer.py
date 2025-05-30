@@ -1,4 +1,4 @@
-'''根据问答类型选择对应的工具函数进行处理'''
+'''Select corresponding tool function for processing based on Q&A type'''
 from typing import Tuple, List, Any
 
 from core.qa.function_tool import map_question_to_function
@@ -10,7 +10,7 @@ def get_answer(
     question: str, history: List[List | None] = None, question_type=None, image_url=None
 ) -> Tuple[Any, userPurposeType]:
     """
-    根据问题类型调用对应的函数获取结果
+    Call corresponding function to get result based on question type
     """
 
     function = map_question_to_function(question_type)

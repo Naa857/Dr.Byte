@@ -1,0 +1,1 @@
+user_message = "Please modify the following sentence and output it without additional text, sentence: 'What would you like to know? I will do my best to assist you.'" 
