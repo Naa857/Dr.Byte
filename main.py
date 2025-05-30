@@ -93,12 +93,11 @@ def image_to_base64(image_path):
 
 # 核心函数
 def grodio_view(chatbot, chat_input):
-
     # 用户消息立即显示
     user_message = chat_input["text"]
     bot_response = "loading..."
     chatbot.append([user_message, bot_response])
-    yield chatbot
+    yield chatbot, gr.MultimodalTextbox(value="", file_count="multiple")
 
     # 处理用户上传的文件
     files = chat_input["files"]
@@ -139,7 +138,7 @@ def grodio_view(chatbot, chat_input):
                     <img src="data:image/png;base64,{image}" alt="Generated Image" style="max-width: 100%; height: auto; cursor: pointer;" />
                 </div>
                 """
-            yield chatbot
+            yield chatbot, gr.MultimodalTextbox(value="", file_count="multiple")
     else:
         image_url = None
 
@@ -190,14 +189,14 @@ def grodio_view(chatbot, chat_input):
                     content = chunk.choices[0].delta.content if hasattr(chunk.choices[0].delta, 'content') else ""
                     bot_response = bot_response + (content or "")
                     chatbot[-1][1] = bot_response
-                    yield chatbot
+                    yield chatbot, gr.MultimodalTextbox(value="", file_count="multiple")
                 else:
                     print("Warning: Received empty chunk or invalid chunk format")
                     continue
         except Exception as e:
             print(f"Error processing stream: {str(e)}")
             chatbot[-1][1] = "Sorry, an error occurred while processing the response, please try again later"
-            yield chatbot
+            yield chatbot, gr.MultimodalTextbox(value="", file_count="multiple")
 
     # 处理图片生成
     if answer[1] == userPurposeType.ImageGeneration:
@@ -214,14 +213,14 @@ def grodio_view(chatbot, chat_input):
             {describe[0]}
             """
         chatbot[-1][1] = combined_message
-        yield chatbot
+        yield chatbot, gr.MultimodalTextbox(value="", file_count="multiple")
 
     # 处理图片描述
     if answer[1] == userPurposeType.ImageDescribe:
         for i in range(0, len(answer[0]), 1):
             bot_response += answer[0][i : i + 1]  # 累加当前chunk到combined_message
             chatbot[-1][1] = bot_response  # 更新chatbot对话中的最后一条消息
-            yield chatbot  # 实时输出当前累积的对话内容
+            yield chatbot, gr.MultimodalTextbox(value="", file_count="multiple")  # 实时输出当前累积的对话内容
 
     # 处理视频
     if answer[1] == userPurposeType.Video:
@@ -229,7 +228,7 @@ def grodio_view(chatbot, chat_input):
             chatbot[-1][1] = answer[0]
         else:
             chatbot[-1][1] = "Sorry, video generation failed, please try again later"
-        yield chatbot
+        yield chatbot, gr.MultimodalTextbox(value="", file_count="multiple")
 
     # 处理PPT
     if answer[1] == userPurposeType.PPT:
@@ -237,7 +236,7 @@ def grodio_view(chatbot, chat_input):
             chatbot[-1][1] = answer[0]
         else:
             chatbot[-1][1] = "Sorry, PPT generation failed, please try again later"
-        yield chatbot
+        yield chatbot, gr.MultimodalTextbox(value="", file_count="multiple")
 
     # 处理Docx
     if answer[1] == userPurposeType.Docx:
@@ -245,7 +244,7 @@ def grodio_view(chatbot, chat_input):
             chatbot[-1][1] = answer[0]
         else:
             chatbot[-1][1] = "Sorry, document generation failed, please try again later"
-        yield chatbot
+        yield chatbot, gr.MultimodalTextbox(value="", file_count="multiple")
 
     # 处理音频生成
     if answer[1] == userPurposeType.Audio:
@@ -253,7 +252,7 @@ def grodio_view(chatbot, chat_input):
             chatbot[-1][1] = answer[0]
         else:
             chatbot[-1][1] = "Sorry, audio generation failed, please try again later"
-        yield chatbot
+        yield chatbot, gr.MultimodalTextbox(value="", file_count="multiple")
 
     # 处理联网搜索
     if answer[1] == userPurposeType.InternetSearch:
@@ -269,11 +268,11 @@ def grodio_view(chatbot, chat_input):
         for i in range(0, len(output_message)):
             bot_response = output_message[: i + 1]
             chatbot[-1][1] = bot_response
-            yield chatbot
+            yield chatbot, gr.MultimodalTextbox(value="", file_count="multiple")
         for chunk in answer[0]:
             bot_response = bot_response + (chunk.choices[0].delta.content or "")
             chatbot[-1][1] = bot_response
-            yield chatbot
+            yield chatbot, gr.MultimodalTextbox(value="", file_count="multiple")
 
 
 def gradio_audio_view(chatbot, audio_input):
@@ -548,7 +547,11 @@ with gr.Blocks(theme=gr.themes.Soft(primary_hue="blue")) as demo:
             examples=examples, inputs=chat_input, visible=True, examples_per_page=15
         )
 
-    chat_input.submit(fn=grodio_view, inputs=[chatbot, chat_input], outputs=[chatbot])
+    chat_input.submit(
+        fn=grodio_view, 
+        inputs=[chatbot, chat_input], 
+        outputs=[chatbot, chat_input]
+    )
     # 切换按钮点击事件
     toggle_voice_button.click(
         fn=toggle_voice_mode,
