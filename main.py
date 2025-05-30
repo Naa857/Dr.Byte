@@ -483,21 +483,18 @@ def toggle_text_mode():
 
 
 examples = [
-    {"text": "You are welcome", "files": []},
+    {"text": "你好，請介紹一下自己", "files": []},
     {"text": "What are the common symptoms of diabetes?", "files": []},
-    {"text": "Answer me again in voice", "files": []},
-    {"text": "Help me search for养生 knowledge", "files": []},
-        {"text": "Help me generate an old man practicing Tai Chi picture", "files": []},
-    {
-        "text": "Help me generate a PPT for科普糖尿病发病原因，症状，治疗药物，预防措施",
-        "files": [],
-    },
-    {"text": "Please give me a reasonable diet suggestion based on the reference materials I provided", "files": []},
-    {"text": "Please generate a word document for科普合理膳食", "files": []},
-    {"text": "I recently want to practice Tai Chi for养生, help me generate an old man practicing Tai Chi video", "files": []},
-    {"text": "Please give me a reasonable treatment plan based on my medical history", "files": []},
-    {"text": "Please introduce common diseases based on knowledge base", "files": []},
-    {"text": "Please tell me what foods are suitable for diabetic patients based on knowledge graph", "files": []},
+    {"text": "請幫我生成一張太極拳的圖片", "files": []},
+    {"text": "Can you help me search for information about traditional Chinese medicine?", "files": []},
+    {"text": "請幫我生成一份關於糖尿病的PPT，包含發病原因、症狀、治療藥物和預防措施", "files": []},
+    {"text": "What foods are suitable for diabetic patients?", "files": []},
+    {"text": "請幫我生成一份養生食譜的Word文檔", "files": []},
+    {"text": "Can you analyze my medical report?", "files": []},
+    {"text": "請幫我生成一個太極拳的視頻", "files": []},
+    {"text": "What are the benefits of practicing Tai Chi?", "files": []},
+    {"text": "請幫我生成一份關於中醫養生的PPT", "files": []},
+    {"text": "Can you generate a Word document about healthy diet?", "files": []},
 ]
 
 
