@@ -42,12 +42,12 @@ __output_format = json.dumps({
     ],
 }, ensure_ascii=True)
 
-_GENERATE_PPT_PROMPT_ = f'''请你根据用户要求生成ppt的详细内容，不要省略。按这个JSON格式输出{__output_format}，只能返回JSON，且JSON不要用```包裹，不要返回markdown格式'''
+_GENERATE_PPT_PROMPT_ = f'''Please generate detailed PPT content based on the user's request without omitting any details. Output according to this JSON format {__output_format}. Only return JSON, do not wrap it in ```, and do not return markdown format.'''
 
 def __construct_messages(question: str, history: List[List | None]) -> List[Dict[str, str]]:
     messages = [
         {"role": "system",
-         "content": "你现在扮演信息抽取的角色，要求根据用户输入和AI的回答，正确提取出信息。"}]
+         "content": "You are now playing the role of information extraction. You are required to correctly extract information based on user input and AI responses."}]
 
     for user_input, ai_response in history:
         messages.append({"role": "user", "content": user_input})

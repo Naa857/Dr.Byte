@@ -42,13 +42,13 @@ __output_format_docx = json.dumps({
 }, ensure_ascii=True)
 
 # 定义一个 prompt 用于生成 docx 内容
-_GENERATE_DOCX_PROMPT_ = f'''请你根据用户要求生成docx的详细内容，不要省略。按这个JSON格式输出{__output_format_docx}，只能返回JSON，且JSON不要用```包裹，不要返回markdown格式'''
+_GENERATE_DOCX_PROMPT_ = f'''Please generate detailed Word document content based on the user's request without omitting any details. Output according to this JSON format {__output_format_docx}. Only return JSON, do not wrap it in ```, and do not return markdown format.'''
 
 # 构造消息函数，历史记录被包括在内
 def __construct_messages_docx(question: str, history: List[List | None]) -> List[Dict[str, str]]:
     messages = [
         {"role": "system",
-         "content": "你现在扮演信息抽取的角色，要求根据用户输入和AI的回答，正确提取出信息。"}]
+         "content": "You are now playing the role of information extraction. You are required to correctly extract information based on user input and AI responses."}]
 
     for user_input, ai_response in history:
         messages.append({"role": "user", "content": user_input})

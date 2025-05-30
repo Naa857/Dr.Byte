@@ -97,7 +97,7 @@ def grodio_view(chatbot, chat_input):
     user_message = chat_input["text"]
     bot_response = "loading..."
     chatbot.append([user_message, bot_response])
-    yield chatbot, gr.MultimodalTextbox(value="", file_count="multiple")
+    yield chatbot, gr.MultimodalTextbox(value="", file_count="multiple"), None
 
     # 处理用户上传的文件
     files = chat_input["files"]
@@ -135,10 +135,10 @@ def grodio_view(chatbot, chat_input):
                 0
             ] += f"""
                 <div>
-                    <img src="data:image/png;base64,{image}" alt="Generated Image" style="max-width: 100%; height: auto; cursor: pointer;" />
+                    <img src=\"data:image/png;base64,{image}\" style=\"max-width: 100%; height: auto; cursor: pointer;\" />
                 </div>
                 """
-            yield chatbot, gr.MultimodalTextbox(value="", file_count="multiple")
+            yield chatbot, gr.MultimodalTextbox(value="", file_count="multiple"), None
     else:
         image_url = None
 
@@ -189,44 +189,30 @@ def grodio_view(chatbot, chat_input):
                     content = chunk.choices[0].delta.content if hasattr(chunk.choices[0].delta, 'content') else ""
                     bot_response = bot_response + (content or "")
                     chatbot[-1][1] = bot_response
-                    yield chatbot, gr.MultimodalTextbox(value="", file_count="multiple")
+                    yield chatbot, gr.MultimodalTextbox(value="", file_count="multiple"), None
                 else:
                     print("Warning: Received empty chunk or invalid chunk format")
                     continue
         except Exception as e:
             print(f"Error processing stream: {str(e)}")
             chatbot[-1][1] = "Sorry, an error occurred while processing the response, please try again later"
-            yield chatbot, gr.MultimodalTextbox(value="", file_count="multiple")
+            yield chatbot, gr.MultimodalTextbox(value="", file_count="multiple"), None
 
     # 处理图片生成
     if answer[1] == userPurposeType.ImageGeneration:
         image_url = answer[0]
-        describe = process_image_describe_tool(
-            question_type=userPurposeType.ImageDescribe,
-            question="Describe this image, do not recognize 'AI generated'",
-            history="",
-            image_url=[image_url],
-        )
-        # 更新图片显示
-        image_display.update(value=image_url, visible=True)
-        # 将描述文本添加到对话
-        chatbot[-1][1] = describe[0]
-        yield chatbot, gr.MultimodalTextbox(value="", file_count="multiple"), image_display
-
-    # 处理图片描述
-    if answer[1] == userPurposeType.ImageDescribe:
-        for i in range(0, len(answer[0]), 1):
-            bot_response += answer[0][i : i + 1]  # 累加当前chunk到combined_message
-            chatbot[-1][1] = bot_response  # 更新chatbot对话中的最后一条消息
-            yield chatbot, gr.MultimodalTextbox(value="", file_count="multiple")  # 实时输出当前累积的对话内容
+        # 不再生成图片描述消息
+        chatbot[-1][1] = (image_url, "image")
+        yield chatbot, gr.MultimodalTextbox(value="", file_count="multiple"), None
 
     # 处理视频
     if answer[1] == userPurposeType.Video:
         if answer[0] is not None:
-            chatbot[-1][1] = answer[0]
+            video_url = answer[0][0]
+            chatbot[-1][1] = f'<video width="50%" controls><source src="{video_url}" type="video/mp4"></video>'
         else:
             chatbot[-1][1] = "Sorry, video generation failed, please try again later"
-        yield chatbot, gr.MultimodalTextbox(value="", file_count="multiple")
+        yield chatbot, gr.MultimodalTextbox(value="", file_count="multiple"), None
 
     # 处理PPT
     if answer[1] == userPurposeType.PPT:
@@ -234,7 +220,7 @@ def grodio_view(chatbot, chat_input):
             chatbot[-1][1] = answer[0]
         else:
             chatbot[-1][1] = "Sorry, PPT generation failed, please try again later"
-        yield chatbot, gr.MultimodalTextbox(value="", file_count="multiple")
+        yield chatbot, gr.MultimodalTextbox(value="", file_count="multiple"), None
 
     # 处理Docx
     if answer[1] == userPurposeType.Docx:
@@ -242,7 +228,7 @@ def grodio_view(chatbot, chat_input):
             chatbot[-1][1] = answer[0]
         else:
             chatbot[-1][1] = "Sorry, document generation failed, please try again later"
-        yield chatbot, gr.MultimodalTextbox(value="", file_count="multiple")
+        yield chatbot, gr.MultimodalTextbox(value="", file_count="multiple"), None
 
     # 处理音频生成
     if answer[1] == userPurposeType.Audio:
@@ -250,7 +236,7 @@ def grodio_view(chatbot, chat_input):
             chatbot[-1][1] = answer[0]
         else:
             chatbot[-1][1] = "Sorry, audio generation failed, please try again later"
-        yield chatbot, gr.MultimodalTextbox(value="", file_count="multiple")
+        yield chatbot, gr.MultimodalTextbox(value="", file_count="multiple"), None
 
     # 处理联网搜索
     if answer[1] == userPurposeType.InternetSearch:
@@ -266,11 +252,11 @@ def grodio_view(chatbot, chat_input):
         for i in range(0, len(output_message)):
             bot_response = output_message[: i + 1]
             chatbot[-1][1] = bot_response
-            yield chatbot, gr.MultimodalTextbox(value="", file_count="multiple")
+            yield chatbot, gr.MultimodalTextbox(value="", file_count="multiple"), None
         for chunk in answer[0]:
             bot_response = bot_response + (chunk.choices[0].delta.content or "")
             chatbot[-1][1] = bot_response
-            yield chatbot, gr.MultimodalTextbox(value="", file_count="multiple")
+            yield chatbot, gr.MultimodalTextbox(value="", file_count="multiple"), None
 
 
 def gradio_audio_view(chatbot, audio_input):
@@ -350,22 +336,15 @@ def gradio_audio_view(chatbot, audio_input):
     # 处理图片生成
     if answer[1] == userPurposeType.ImageGeneration:
         image_url = answer[0]
-        describe = process_image_describe_tool(
-            question_type=userPurposeType.ImageDescribe,
-            question="Describe this image, do not recognize 'AI generated'",
-            history=" ",
-            image_url=[image_url],
-        )
-        # 更新图片显示
-        image_display.update(value=image_url, visible=True)
-        # 将描述文本添加到对话
-        chatbot[-1][1] = describe[0]
-        yield chatbot, image_display
+        # 不再生成图片描述消息
+        chatbot[-1][1] = (image_url, "image")
+        yield chatbot, gr.MultimodalTextbox(value="", file_count="multiple"), None
 
     # 处理视频
     if answer[1] == userPurposeType.Video:
         if answer[0] is not None:
-            chatbot[-1][1] = answer[0]
+            video_url = answer[0][0]
+            chatbot[-1][1] = f'<video width="50%" controls><source src="{video_url}" type="video/mp4"></video>'
         else:
             try:
                 chatbot[-1][1] = (
@@ -515,7 +494,6 @@ with gr.Blocks(theme=gr.themes.Soft(primary_hue="blue")) as demo:
                 placeholder="\n## Welcome to talk to me \n————This project is open source, https://github.com/Warma10032/cyber-doctor",
             )
             # 添加图片显示组件
-            image_display = gr.Image(label="Generated Image", visible=False)
 
     with gr.Row():
         with gr.Column(scale=9):
@@ -532,7 +510,7 @@ with gr.Blocks(theme=gr.themes.Soft(primary_hue="blue")) as demo:
                 type="filepath",
             )
         with gr.Column(scale=1):
-            clear = gr.ClearButton([chatbot, chat_input, audio_input, image_display], value="Clear Record")
+            clear = gr.ClearButton([chatbot, chat_input, audio_input], value="Clear Record")
             toggle_voice_button = gr.Button("Voice Conversation Mode", visible=True)
             toggle_text_button = gr.Button("Text Conversation Mode", visible=False)
             submit_audio_button = gr.Button("Send", visible=False)

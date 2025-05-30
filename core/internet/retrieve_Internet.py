@@ -1,7 +1,7 @@
 '''Call the interface in model/Internet to retrieve searched materials'''
 from typing import List,Tuple
 from langchain_core.documents import Document
-from core.model.Internet.Internet_service import retrieve
+from core.internet.Internet_service import retrieve
 
 def format_docs(docs:List[Document]):
     return "\n-------------Separator--------------\n".join(doc.page_content for doc in docs)
